@@ -16,7 +16,8 @@ export default class EditCell extends React.Component {
         phone_number:'',
         email:'',
         loading:false,
-        errors:[]
+        errors:[],
+        text:'Add'
     }
 
     handleSubmit = () => {
@@ -26,19 +27,20 @@ export default class EditCell extends React.Component {
     componentDidMount() {
         const { route : { params }} = this.props;
         if(params) {
-            // this.setState({
-            //     ...cell
-            // })
+            this.setState({
+                ...params.cell,
+                text:'Update'
+            })
         }
 
     }
 
     render() {
-        const { name, phone_number, email, loading, errors } = this.state;
+        const { name, phone_number, email, loading, errors, text } = this.state;
         const hasError = (key) =>  errors.includes(key);
         return (
             <Block style={styles.container} color={theme.colors.white}>
-                <Typography center h3>Edit Profile</Typography>
+                <Typography center h3>{text} Cell</Typography>
                 <Block padding={[5, 8]}>
                     <Input 
                         email

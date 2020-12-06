@@ -57,7 +57,7 @@ export default class Login extends React.Component {
                     <Input 
                         email
                         error={hasError('email')}
-                        label={"Email"}
+                        label={"Registration Number"}
                         value={email}
                         style={styles.input}
                         onChangeText={text => this.setState({email:text, errors:[]})}

@@ -38,15 +38,14 @@ const Navigator = () => {
                     )
                 }}
             >
-                <Stack.Screen 
+                {/* <Stack.Screen 
                     name="Map" 
                     component={TabNavigator}
                     options={{
                         title:"Map",
                         headerShown:false,
                     }}
-        
-                />
+                /> */}
                 <Stack.Screen 
                     name="Welcome" 
                     component={Welcome}

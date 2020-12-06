@@ -59,6 +59,14 @@ export default class SignUp extends React.Component {
                 </Block>
                 <Block middle>
                     <Input 
+                        error={hasError('reg_no')}
+                        label={"Registration Number"}
+                        value={name}
+                        style={styles.input}
+                        onChangeText={text => this.setState({name:text, errors:[]})}
+                    />
+
+                    <Input 
                         email
                         error={hasError('email')}
                         label={"Email"}
@@ -70,6 +78,14 @@ export default class SignUp extends React.Component {
                     <Input 
                         error={hasError('name')}
                         label={"Name"}
+                        value={name}
+                        style={styles.input}
+                        onChangeText={text => this.setState({name:text, errors:[]})}
+                    />
+
+                    <Input 
+                        error={hasError('name')}
+                        label={"Residence"}
                         value={name}
                         style={styles.input}
                         onChangeText={text => this.setState({name:text, errors:[]})}

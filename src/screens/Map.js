@@ -67,7 +67,7 @@ export default class MapContainer extends React.Component {
             building:{},
             activeAmenity:null,
             alerts:[],
-            activeAlert:null
+            activeAlert:true
         }
     }
 
