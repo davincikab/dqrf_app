@@ -1,0 +1,12 @@
+{
+  "name": "crime-map",
+  "displayName": "crime-map",
+  "expo": {
+    "name": "crime-map",
+    "slug": "crime-map",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
