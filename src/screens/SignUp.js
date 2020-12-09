@@ -7,23 +7,29 @@ import Button from '../components/Button';
 import Typography from '../components/Text';
 import { theme } from '../constants';
 
+import Authentication from '../utils/authentication/authenticate';
+
 
 export default class SignUp extends React.Component {
     state = {
-        email:'',
-        name:'',
-        password:'',
-        password2:'',
+        username:'katherine',
+        email:'katherine@gmail.com',
+        password:'477jesusc',
+        password2:'477jesusc',
         errors:[],
-        loading:false
+        loading:false,
+        residence:'Mweiga',
+        mobile_no:'254123456',
+        first_name:'Katherine',
+        last_name:'Mwangi'
     }
 
     handleSubmit = () => {
         console.log("Press");
-        const { email, name, password, password2, errors } = this.state;
+        const { email, username, password, password2, errors } = this.state;
 
         if(email == "")  { errors.push('email') }
-        if(name == "") { errors.push('name') }
+        if(username == "") { errors.push('name') }
         if(password !== password2) { errors.push("password") }
 
         if(password == "" || password2 == "" || password.length < 8) {
@@ -40,14 +46,33 @@ export default class SignUp extends React.Component {
                 loading:true
             });
 
+            const { residence, mobile_no, first_name, last_name } = this.state;
+            let auth = new Authentication();
+
+            let response = auth.register({
+                username:username,
+                email:email,
+                password:password,
+                password2:password2,
+                residence:residence,
+                mobile_no:mobile_no,
+                first_name:first_name,
+                last_name:last_name
+            });
+
+            console.log(response);
+
+            this.setState({
+                loading:false
+            });
+
             return;
         }
-
        
     }
 
     render() {
-        const { email, name, password, password2, errors, loading } = this.state;
+        const { username, email, password, password2, residence, mobile_no, errors, loading } = this.state;
         const hasError = (key) =>  errors.includes(key);
 
         return (
@@ -61,9 +86,9 @@ export default class SignUp extends React.Component {
                     <Input 
                         error={hasError('reg_no')}
                         label={"Registration Number"}
-                        value={name}
+                        value={username}
                         style={styles.input}
-                        onChangeText={text => this.setState({name:text, errors:[]})}
+                        onChangeText={text => this.setState({username:text, errors:[]})}
                     />
 
                     <Input 
@@ -76,19 +101,19 @@ export default class SignUp extends React.Component {
                     />
 
                     <Input 
-                        error={hasError('name')}
-                        label={"Name"}
-                        value={name}
+                        error={hasError('mobile number')}
+                        label={"Mobile No."}
+                        value={mobile_no}
                         style={styles.input}
-                        onChangeText={text => this.setState({name:text, errors:[]})}
+                        onChangeText={text => this.setState({mobile_no:text, errors:[]})}
                     />
 
                     <Input 
-                        error={hasError('name')}
+                        error={hasError('residence')}
                         label={"Residence"}
-                        value={name}
+                        value={residence}
                         style={styles.input}
-                        onChangeText={text => this.setState({name:text, errors:[]})}
+                        onChangeText={text => this.setState({residence:text, errors:[]})}
                     />
 
                     <Input 
