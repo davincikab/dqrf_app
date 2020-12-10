@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import Navigator from './src/navigation';
+import deviceStorage from './src/utils/deviceStorage';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -12,6 +13,8 @@ export default class App extends React.Component {
       jwt:'',
       loading:true
     }
+
+    this.loadJWT = this.loadJWT.bind(this);
   }
 
   newJWT = (token) => {
@@ -22,6 +25,19 @@ export default class App extends React.Component {
     });
 
   }
+
+  async loadJWT () {
+    let jwt = await deviceStorage.loadJWT('id_token');
+    
+    this.setState({
+      jwt
+    });
+  }
+
+  componentDidMount() {
+    this.loadJWT();
+  }
+
   render() {
     const { jwt } = this.state;
 

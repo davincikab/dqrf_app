@@ -35,7 +35,23 @@ export default class Authentication {
         });
     }
 
+    getAlerts = (token) => {
+        console.log('Fetching alerts: ' + token);
+        // 0ca2cf3a88f46bd1fb41823ab8090398ef55f71b
+        let headers = {
+            "Authorization": `Token ${token}`
+        };
 
+        return axios.get(ALERTS_URL,{headers:headers}).then(response => {
+            console.log(response);
+            return response.data.features;
+        })
+        .catch(error => {
+            console.log(error.response);
+            // failed registration
+            return [];
+        });
+    }
 
 }
 

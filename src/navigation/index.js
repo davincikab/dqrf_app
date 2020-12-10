@@ -20,26 +20,72 @@ import EditCells from '../screens/EditCells'
 import { theme } from '../constants';
 
 const Stack = createStackNavigator();
+const screenOptions = {
+    headerBackImage:{
+
+    },
+    headerStyle:{
+        elevation:0,
+        backgroundColor:theme.colors.white
+    },
+    headerBackImage:() =>(
+        <Image source={require('../assets/icons/back.png')} style={{ marginLeft:10}} />
+    )
+};
 
 const Navigator = (props) => {
     const { jwt, newJWT } = props;
     return  (
         <NavigationContainer>
-            <Stack.Navigator
-                screenOptions={{
-                    headerBackImage:{
+                { jwt ?  
+                    <AuthenticatedNavigator jwt={jwt} newJWT={(token) => newJWT(token)}/> :
+                    <NonAuthenticatedNavigator jwt={jwt} newJWT={(token) => newJWT(token)}/>
+                }  
+        </NavigationContainer>
+    );
+}
 
-                    },
-                    headerStyle:{
-                        elevation:0,
-                        backgroundColor:theme.colors.white
-                    },
-                    headerBackImage:() =>(
-                        <Image source={require('../assets/icons/back.png')} style={{ marginLeft:10}} />
-                    )
-                }}
-            >
-                <Stack.Screen 
+
+export default Navigator;
+
+// TAB NAVIGATION
+const Tab = createBottomTabNavigator();
+function TabNavigator(props) {
+    const { jwt } = props;
+    return(
+        <Tab.Navigator
+            screenOptions={({ route }) => ({
+                tabBarIcon:({ focused, color, size }) => {
+                    let iconName;
+
+                    iconName = route.name == "Map" ? 'map' : route.name == 'Alerts' ? 'exclamation-circle' : 'mobile';
+                    return <Icon name={iconName} size={size} color={color} />;
+                }
+            }) 
+            }
+        >
+            <Tab.Screen name="Map" >
+                { props => <Map {...props} jwt={jwt} />}
+            </Tab.Screen>
+            
+            <Tab.Screen name="Alerts" >
+                { props => <Alerts {...props} jwt={jwt} />}
+            </Tab.Screen>  
+
+            <Tab.Screen name="Cells">
+                { props => <Cells {...props} jwt={jwt} />}
+            </Tab.Screen>   
+        </Tab.Navigator>
+    )
+}
+
+function NonAuthenticatedNavigator(props) {
+    const { jwt, newJWT } = props;
+    return (
+        <Stack.Navigator
+            screenOptions={screenOptions}
+        >
+            <Stack.Screen 
                     name="Welcome" 
                     component={Welcome}
                     options={{
@@ -68,19 +114,29 @@ const Navigator = (props) => {
                         headerShown:true,
                     }}
                 >
-                    { props => <Login {...props} newJWT={props.newJWT} jwt={jwt}/> }
+                    { props => <Login {...props} jwt={jwt} newJWT={(token) => newJWT(token)} /> }
                 </Stack.Screen>
+        </Stack.Navigator>
+    )
+}
 
-                {/* { jwt && 
-                <>
+function AuthenticatedNavigator(props) {
+    const { jwt, newJWT } = props;
+    return (
+        <Stack.Navigator
+            screenOptions={screenOptions}
+        >
                 <Stack.Screen 
-                    name="Map" 
-                    component={TabNavigator}
+                    name="Tab" 
+                    // component={TabNavigator}
                     options={{
-                        title:"Map",
+                        title:"",
                         headerShown:false,
                     }}
-                />
+                >
+                    {props => <TabNavigator jwt={jwt} /> }
+                </Stack.Screen> 
+
                 <Stack.Screen 
                     name="Profile" 
                     component={Profile}
@@ -98,37 +154,10 @@ const Navigator = (props) => {
                         headerShown:true,
                     }}
                 />
-                </>
-            } */}
-            </Stack.Navigator>
-        </NavigationContainer>
-    );
-}
-
-
-export default Navigator;
-
-// TAB NAVIGATION
-const Tab = createBottomTabNavigator();
-function TabNavigator() {
-    return(
-        <Tab.Navigator
-            screenOptions={({ route }) => ({
-                tabBarIcon:({ focused, color, size }) => {
-                    let iconName;
-
-                    iconName = route.name == "Map" ? 'map' : route.name == 'Alerts' ? 'exclamation-circle' : 'mobile';
-                    return <Icon name={iconName} size={size} color={color} />;
-                }
-            }) 
-            }
-        >
-            <Tab.Screen name="Map" component={Map} />
-            <Tab.Screen name="Alerts" component={Alerts} />   
-            <Tab.Screen name="Cells" component={Cells} />   
-        </Tab.Navigator>
+        </Stack.Navigator>
     )
 }
+
 
 const Drawer = createDrawerNavigator();
 

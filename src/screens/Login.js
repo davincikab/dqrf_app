@@ -7,23 +7,36 @@ import Button from '../components/Button';
 import Typography from '../components/Text';
 import { theme } from '../constants';
 
+import Authentication from '../utils/authentication/authenticate';
+import deviceStorage from '../utils/deviceStorage';
+
 
 export default class Login extends React.Component {
-    state = {
-        email:'',
-        password:'',
-        errors:[''],
-        loading:false
-    }
+    constructor(props) {
+        super(props);
+
+        this.handleLogin = this.handleLogin.bind(this);
+
+        this.state = {
+            username:'katheri',
+            password:'477jesusc',
+            errors:{},
+            loading:false
+        }
+    }    
 
     handleSubmit = () => {
-        const { email, password, errors } = this.state;
-        if(email == "") {
-            errors.push('email');
+        const { username, password, errors } = this.state;
+        if(username == "") {
+            errors.email.push('email');
         } 
 
-        if(password == "" || password.length < 8) {
-            errors.push('password');
+        if(password == "" ) {
+            errors.password.push('Password is require');
+        }
+
+        if( password.length < 8) {
+            errors.password.push('Password too short. Min 8 characters');   
         }
 
         this.setState({
@@ -31,24 +44,61 @@ export default class Login extends React.Component {
         });
 
         // Authentication backed API
-        if(errors.length == 0) {
+        if(Object.keys(errors).length == 0) {
             this.setState({
                 loading:true
             });
 
+            this.handleLogin(username, password);
             return;
         }
 
        
     }
 
+    async handleLogin(username, password) {
+        let auth = new Authentication();
+        let response = await auth.login(username, password);
+
+        if(response.status == 201 || response.status == 200) {
+            deviceStorage.saveItem(response.data.key);
+
+            this.setState({
+                loading:false
+            }, () => {
+                // this.props.navigation.navigate("Tab", { screen:"Map" });
+                this.props.newJWT(response.data.key);
+            });
+
+            
+        }
+
+        if(response.status == 400 || response.status == 403 || response.status == 404) {
+            console.log("Error response");
+            console.log(response);
+            // append the errors to our state
+            this.setState({
+                errors:response.data,
+                loading:false
+            });
+        }
+    }
+
     componentDidMount() {
-        console.log(this.props.jwt)
+        // console.log(this.props);
+        if(this.props.jwt) {
+            this.props.navigation.navigate("Map");
+        }
     }
 
     render() {
-        const { email, password, errors, loading } = this.state;
-        const hasError = (key) =>  errors.includes(key);
+        const { username, password, errors, loading } = this.state;
+        const hasError = (key) => {
+            if(errors[key]) {
+                return  errors[key].length != 0;
+            }
+            
+        }
 
         return (
             <Block style={styles.container} color={theme.colors.white}>
@@ -59,12 +109,11 @@ export default class Login extends React.Component {
                 </Block>
                 <Block middle>
                     <Input 
-                        email
-                        error={hasError('email')}
+                        error={hasError('username')}
                         label={"Registration Number"}
-                        value={email}
+                        value={username}
                         style={styles.input}
-                        onChangeText={text => this.setState({email:text, errors:[]})}
+                        onChangeText={text => this.setState({username:text, errors:[]})}
                     />
 
                     <Input 

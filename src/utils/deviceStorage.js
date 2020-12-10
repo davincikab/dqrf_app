@@ -11,9 +11,12 @@ export default deviceStorage = {
 
     async loadJWT (key) {
         try {
-            await AsyncStorage.getItem(key);
+            const value = await AsyncStorage.getItem(key);
+
+            return value;
         } catch (error) {
             console.log("Error: " + error.message);
+            return "";
         }
     },
 
