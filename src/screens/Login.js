@@ -42,6 +42,10 @@ export default class Login extends React.Component {
        
     }
 
+    componentDidMount() {
+        console.log(this.props.jwt)
+    }
+
     render() {
         const { email, password, errors, loading } = this.state;
         const hasError = (key) =>  errors.includes(key);

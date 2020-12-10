@@ -21,7 +21,8 @@ import { theme } from '../constants';
 
 const Stack = createStackNavigator();
 
-const Navigator = () => {
+const Navigator = (props) => {
+    const { jwt, newJWT } = props;
     return  (
         <NavigationContainer>
             <Stack.Navigator
@@ -38,14 +39,6 @@ const Navigator = () => {
                     )
                 }}
             >
-                {/* <Stack.Screen 
-                    name="Map" 
-                    component={TabNavigator}
-                    options={{
-                        title:"Map",
-                        headerShown:false,
-                    }}
-                /> */}
                 <Stack.Screen 
                     name="Welcome" 
                     component={Welcome}
@@ -53,24 +46,40 @@ const Navigator = () => {
                         title:null,
                         headerShown:false
                     }}
+
                 />
+    
                 <Stack.Screen 
                     name="SignUp" 
-                    component={SignUp}
+                    // component={SignUp}
                     options={{
                         title:"",
                         headerShown:true,
                     }}
-        
-                />
+                >
+                    { props => <SignUp {...props} newJWT={(token) => newJWT(token)} /> }
+                </Stack.Screen>
+
                 <Stack.Screen 
                     name="Login" 
-                    component={Login}
+                    // component={Login}
                     options={{
                         title:"",
                         headerShown:true,
                     }}
-        
+                >
+                    { props => <Login {...props} newJWT={props.newJWT} jwt={jwt}/> }
+                </Stack.Screen>
+
+                {/* { jwt && 
+                <>
+                <Stack.Screen 
+                    name="Map" 
+                    component={TabNavigator}
+                    options={{
+                        title:"Map",
+                        headerShown:false,
+                    }}
                 />
                 <Stack.Screen 
                     name="Profile" 
@@ -89,6 +98,8 @@ const Navigator = () => {
                         headerShown:true,
                     }}
                 />
+                </>
+            } */}
             </Stack.Navigator>
         </NavigationContainer>
     );

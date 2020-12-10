@@ -27,6 +27,10 @@ export default class Welcome extends React.Component {
         this.props.navigation.navigate('SignUp');
     }
 
+    componentDidMount() {
+        // console.log(this.props.jwt);s
+    }
+
     renderTerms = () => {
         const { iAgree } = this.state;
 

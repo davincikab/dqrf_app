@@ -8,48 +8,67 @@ import Typography from '../components/Text';
 import { theme } from '../constants';
 
 import Authentication from '../utils/authentication/authenticate';
+import deviceStorage from '../utils/deviceStorage';
 
 
 export default class SignUp extends React.Component {
-    state = {
-        username:'katherine',
-        email:'katherine@gmail.com',
-        password:'477jesusc',
-        password2:'477jesusc',
-        errors:[],
-        loading:false,
-        residence:'Mweiga',
-        mobile_no:'254123456',
-        first_name:'Katherine',
-        last_name:'Mwangi'
-    }
+    constructor(props) {
+        super(props);
 
+        this.state = {
+            username:'gakuokama',
+            email:'gakuokama@gmail.com',
+            password:'477jesusc',
+            password2:'477jesusc',
+            errors:{},
+            loading:false,
+            residence:'Mweiga',
+            mobile_no:'25423128756',
+            first_name:'Gakuo',
+            last_name:'Gakii'
+        };
+    
+        this.handleRegister = this.handleRegister.bind(this);
+    }
+    
     handleSubmit = () => {
         console.log("Press");
         const { email, username, password, password2, errors } = this.state;
 
-        if(email == "")  { errors.push('email') }
-        if(username == "") { errors.push('name') }
-        if(password !== password2) { errors.push("password") }
+        if(email == "")  { 
+            errors.email.push('Email is required') 
+        }
 
-        if(password == "" || password2 == "" || password.length < 8) {
-            errors.push('password');
+        if(username == "") { 
+            errors.username.push('Name is required');
+        }
+
+        if(password !== password2) { 
+            errors.password.push("Passwords do not match") 
+        }
+
+        if(password == "" || password2 == "") {
+            errors.password.push('Password is require');
+        }
+
+        if( password.length < 8) {
+            errors.password.push('Password too short. Min 8 characters');   
         }
 
         this.setState({
             errors
         });
 
+        console.log(errors);
+
         // Authentication backed API
-        if(errors.length == 0) {
+        if(Object.keys(errors).length == 0) {
             this.setState({
                 loading:true
             });
 
             const { residence, mobile_no, first_name, last_name } = this.state;
-            let auth = new Authentication();
-
-            let response = auth.register({
+            this.handleRegister({
                 username:username,
                 email:email,
                 password:password,
@@ -59,21 +78,54 @@ export default class SignUp extends React.Component {
                 first_name:first_name,
                 last_name:last_name
             });
-
-            console.log(response);
-
-            this.setState({
-                loading:false
-            });
-
-            return;
+        
         }
        
     }
 
+    async handleRegister(user) {
+        let auth = new Authentication();
+
+            let response = await auth.register(user);
+
+            // console.log(response);
+
+            if(response.status == 201 || response.status == 200) {
+                deviceStorage.saveItem(response.data.key);
+                this.props.newJWT(response.data.key);
+
+                this.setState({
+                    loading:false
+                });
+
+                this.props.navigation.navigate('Login');
+            }
+
+            if(response.status == 400 || response.status == 403 || response.status == 404) {
+                console.log("Error response");
+                console.log(response);
+                // append the errors to our state
+                this.setState({
+                    errors:response.data,
+                    loading:false
+                });
+            }
+
+    }
+    componentDidMount() {
+        console.log(this.props);
+    }
+
     render() {
         const { username, email, password, password2, residence, mobile_no, errors, loading } = this.state;
-        const hasError = (key) =>  errors.includes(key);
+        console.log(errors['username']);
+
+        const hasError = (key) => {
+            if(errors[key]) {
+                return  errors[key].length != 0;
+            }
+            
+        }
 
         return (
             <Block style={styles.container} color={theme.colors.white}>
@@ -81,10 +133,14 @@ export default class SignUp extends React.Component {
                     <Typography h1 black bold>
                        Sign Up
                     </Typography>
+
+                    <Typography accent>
+                        {errors.detail}
+                    </Typography>
                 </Block>
                 <Block middle>
                     <Input 
-                        error={hasError('reg_no')}
+                        error={hasError('username')}
                         label={"Registration Number"}
                         value={username}
                         style={styles.input}
