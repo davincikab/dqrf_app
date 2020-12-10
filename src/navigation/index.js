@@ -64,9 +64,9 @@ function TabNavigator(props) {
             }) 
             }
         >
-            <Tab.Screen name="Map" >
+            {/* <Tab.Screen name="Map" >
                 { props => <Map {...props} jwt={jwt} />}
-            </Tab.Screen>
+            </Tab.Screen> */}
             
             <Tab.Screen name="Alerts" >
                 { props => <Alerts {...props} jwt={jwt} />}

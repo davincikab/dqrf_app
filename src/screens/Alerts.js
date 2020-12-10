@@ -14,19 +14,27 @@ import { theme, alerts } from '../constants';
 
 // utils
 import getIconNameByAlertType from '../utils/getIconName';
+import Authentication from '../utils/authentication/authenticate';
 
 export default class Alerts extends React.Component {
-    state = {
-        value:'',
-        allAlerts:[],
-        alerts:[]
-    };
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            value:'',
+            allAlerts:[],
+            alerts:[]
+        };
+
+        this.getAlerts = this.getAlerts.bind(this);
+    }
 
     onSearchAlert = (text) => {
         const { allAlerts } = this.state;
 
         let alertsFilter = allAlerts.filter(alert => {
-            if(alert.title.toLowerCase().includes(text.toLowerCase())) {
+            if(alert.properties.description.toLowerCase().includes(text.toLowerCase()) ||
+            alert.properties.emergency_type.toLowerCase().includes(text.toLowerCase()) ) {
                 return alert
             }
         });
@@ -49,26 +57,26 @@ export default class Alerts extends React.Component {
 
     renderItem = ({item}) => {
         let iconName = getIconNameByAlertType(item.type);
-        let time = new Date(item.time);
+        let time = new Date(item.properties.time);
     
         return (
             <Card>
                 <Block style={styles.cardHeader}>
                     <Icon name={iconName} size={30} color={theme.colors.accent}/>
-                    <Typography title style={styles.cardTitle}>{item.title}</Typography>
+                    <Typography title style={styles.cardTitle}>{item.properties.emergency_type}</Typography>
                 </Block>
                 <Block>
-                    <Typography>{item.description}</Typography>
+                    <Typography>{item.properties.description}</Typography>
                     <Block style={{ flexDirection:'row'}} margin={[2,0]}>
                         <Icon name="map-marker" size={18} color={ theme.colors.black} />
                         <Typography black style={styles.marginLeft}>
-                            {item.location} 
+                            {item.properties.location_name} 
                         </Typography>
                     </Block>
 
                     <Block style={{ flexDirection:'row'}} space={"between"} margin={[2,0]}>
                         <Typography small gray>
-                            {item.reported_by}
+                            {item.properties.reported_by}
                         </Typography>
                         <Typography small gray>
                             {time.getHours()}:{time.getMinutes()}
@@ -80,11 +88,22 @@ export default class Alerts extends React.Component {
         )
     }
 
-    componentDidMount() {
+    async getAlerts() {
+        let api = new Authentication();
+
+        const { jwt } = this.props
+        let alerts = await api.getAlerts(jwt);
+        console.log(alerts);
+
+        // flatten the alert
         this.setState({
             alerts:alerts,
             allAlerts:alerts
         });
+    }
+
+    componentDidMount() {
+       this.getAlerts();
     }
 
     render() {
@@ -125,7 +144,7 @@ export default class Alerts extends React.Component {
                 <Block flex={1} >
                     <FlatList 
                         data={alerts}
-                        keyExtractor={(item) => item.id.toString()}
+                        keyExtractor={(item) => item.properties.pk.toString()}
                         renderItem={this.renderItem}
                     />
                 </Block>

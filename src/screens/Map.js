@@ -27,7 +27,6 @@ import { theme,  } from '../constants';
 import getColorsByAlertType from '../utils/getColors';
 import getIconNameByAlertType from '../utils/getIconName';
 import Authentication from '../utils/authentication/authenticate';
-import { colors } from '../constants/theme';
 
 MapboxGL.setAccessToken("pk.eyJ1IjoiZGF1ZGk5NyIsImEiOiJjanJtY3B1bjYwZ3F2NGFvOXZ1a29iMmp6In0.9ZdvuGInodgDk7cv-KlujA");
 
