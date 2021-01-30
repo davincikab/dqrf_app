@@ -66,7 +66,7 @@ export default class EditCell extends React.Component {
                         onChangeText={text => this.setState({phone_number:text, errors:[]})}
                     />
 
-                    <Button color={theme.colors.accent} onPress={this.handleSubmit}>
+                    <Button color={theme.colors.primary} onPress={this.handleSubmit}>
                         { loading && <ActivityIndicator size="small" color={theme.colors.white} />}
                         {!loading && 
                             <Typography center white>

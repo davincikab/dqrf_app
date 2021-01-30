@@ -55,6 +55,18 @@ export default class Alerts extends React.Component {
         this.props.navigation.goBack();
     }
 
+    // navigate to alert chat
+    navigateToChatAlert = (alert) => {
+        const { jwt } = this.props;
+
+        console.log(alert.properties);
+        this.props.navigation.navigate('Alert Chat', {
+            token:jwt,
+            alert:alert.properties
+        });
+
+    }
+
     renderItem = ({item}) => {
         let iconName = getIconNameByAlertType(item.type);
         let time = new Date(item.properties.time);
@@ -64,6 +76,14 @@ export default class Alerts extends React.Component {
                 <Block style={styles.cardHeader}>
                     <Icon name={iconName} size={30} color={theme.colors.accent}/>
                     <Typography title style={styles.cardTitle}>{item.properties.emergency_type}</Typography>
+                    
+                    <Button shadow 
+                        style={styles.actionButton} 
+                        color={"black"} 
+                        onPress={(e) => this.navigateToChatAlert(item)}
+                    >
+                        <Icon name="whatsapp" size={18} color={ theme.colors.white}/>
+                    </Button>
                 </Block>
                 <Block>
                     <Typography>{item.properties.description}</Typography>
@@ -76,7 +96,7 @@ export default class Alerts extends React.Component {
 
                     <Block style={{ flexDirection:'row'}} space={"between"} margin={[2,0]}>
                         <Typography small gray>
-                            {item.properties.reported_by}
+                            {item.properties.username}
                         </Typography>
                         <Typography small gray>
                             {time.getHours()}:{time.getMinutes()}
@@ -111,7 +131,7 @@ export default class Alerts extends React.Component {
         return(
             <Block style={styles.container} >
                 <Block center 
-                    color={theme.colors.accent} shadow 
+                    color={theme.colors.primary} shadow 
                     flex={false} 
                     style={styles.header}
                     padding={[0,10]}
@@ -177,5 +197,17 @@ const styles = StyleSheet.create({
     searchInput: {
         backgroundColor:theme.colors.white,
         borderWidth:0,
-    }
+    },
+    actionButton:{
+        position:'absolute',
+        top:0,
+        right:0,
+        height:30,
+        width:30,
+        borderRadius:20,
+        justifyContent:'center',
+        alignItems:'center',
+        marginHorizontal:4,
+        elevation:1
+    },
 });

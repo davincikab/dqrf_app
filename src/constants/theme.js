@@ -1,8 +1,8 @@
 const colors = {
     gray:'#282c34',
     white:'#fff',
-    primary:'#d01212',
-    secondary:'#338873',
+    primary:'#156504',
+    secondary:'#cbd000',
     gray: "#9DA3B4",
     gray2: "#C5CCD6",
     black:'#000',

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   StyleSheet, 
   TouchableOpacity,
@@ -7,9 +7,10 @@ import {
   KeyboardAvoidingView, Text, Alert
 } from "react-native";
 
+// 3rd party
 import MapboxGL from "@react-native-mapbox-gl/maps";
-
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Geolocation from '@react-native-community/geolocation';
 
 // data
 import * as Amenity from '../assets/data/amenity.json';
@@ -68,7 +69,9 @@ export default class MapContainer extends React.Component {
             building:{},
             activeAmenity:null,
             alerts:[],
-            activeAlert:{}
+            activeAlert:{},
+            isReportMode:false,
+            userLocation:{}
         };
 
         this.getAlerts = this.getAlerts.bind(this);
@@ -98,8 +101,43 @@ export default class MapContainer extends React.Component {
         console.log(alerts);
 
         this.setState({
-            alerts:alerts
+            alerts:alerts,
         });
+    }
+
+    addAlert = () => {
+        console.log("Adding alert");
+
+        // trigger geolocation
+        Geolocation.getCurrentPosition(info => {
+            console.log("Location Response");
+            console.log(info);
+
+            // update the state
+            this.setState({
+                isReportMode:false,
+                userLocation:{
+                   latitude: info.coords.latitude, 
+                   longitude: info.coords.longitude,
+                }
+            });
+
+            // reroute to another page
+            let { jwt } = this.props;
+            this.props.navigation.navigate("Create Alert", {
+                user:2,
+                token: jwt,
+                userLocation: {
+                    lat: info.coords.latitude, 
+                    lng: info.coords.longitude,
+                }
+            });
+
+        }, error => {
+            console.log("Location Response");
+            console.error(error);
+        });
+        
     }
 
     componentDidMount() {
@@ -125,7 +163,7 @@ export default class MapContainer extends React.Component {
 
     render() {
 
-        const { amenity, roads, building, activeAmenity, activeAlert, alerts} = this.state;
+        const { amenity, roads, building, activeAmenity, activeAlert, alerts, isReportMode} = this.state;
 
         return(
         <KeyboardAvoidingView
@@ -228,8 +266,16 @@ export default class MapContainer extends React.Component {
                 }
               </MapboxGL.MapView>
                 <Button 
+                    style={[styles.circleButton, styles.locationButton]} 
+                    color={theme.colors.accent}
+                >
+                  <Icon name="location-arrow" size={theme.sizes.base} color={theme.colors.white} />
+                </Button>
+
+                <Button 
                     style={[styles.circleButton, styles.addButton]} 
                     color={theme.colors.accent}
+                    onPress={this.addAlert}
                 >
                   <Icon name="plus" size={theme.sizes.base} color={theme.colors.white} />
                 </Button>
@@ -245,6 +291,18 @@ export default class MapContainer extends React.Component {
                 <AlertModal 
                     alert={activeAlert}
                     closeAlertModal={() => this.setState({activeAlert:{} })}
+                />
+            }
+
+            {
+                isReportMode &&
+                <AlertCreateModal 
+                    reported_by=""
+                    emergency_type=""
+                    time=""
+                    location_name=""
+                    username = ""
+                    description=""
                 />
             }
             </Block>
@@ -359,6 +417,69 @@ const AlertModal = ({alert, closeAlertModal}) => {
     )
 }
 
+const AlertCreateModal = function(props) {
+    const { emergency_type, username, description, response_time, location, media} = props;
+
+    const [loading, setLoading] = useState(false);
+    const hasError = (field) => {
+        return false;
+    }
+
+    return (
+        <Block style={styles.alertForm} color={theme.colors.white}>
+                <Block flex={0.2} middle>
+                    <Typography h1 black bold>
+                       Create Alert
+                    </Typography>
+                </Block>
+                <Block middle>
+                    <Input 
+                        error={hasError('location')}
+                        label={"Location"}
+                        value={"location"}
+                        style={styles.input}
+                        // onChangeText={text => this.setState({username:text, errors:[]})}
+                    />
+
+                    <Input 
+                        error={hasError('username')}
+                        // label={"Registration Number"}
+                        value={""}
+                        style={styles.input}
+                        // onChangeText={text => this.setState({username:text, errors:[]})}
+                    />
+
+                    <Input 
+                        error={hasError('Description')}
+                        // label={"Registration Number"}
+                        value={""}
+                        style={styles.input}
+                        // onChangeText={text => this.setState({username:text, errors:[]})}
+                    />
+
+                    <Input 
+                        secure
+                        label={"Alert Type"}
+                        // error={hasError('password')}
+                        value={emergency_type}
+                        style={styles.input}
+                        // onChangeText={text => this.setState({password:text, errors:[]})}
+                    />
+
+                    <Button color={theme.colors.primary}>
+                        { loading && <ActivityIndicator size="small" color={theme.colors.white} />}
+                        {!loading && 
+                            <Typography center white>
+                                Report Alert
+                            </Typography>
+                        }
+                    </Button>
+                </Block>
+                
+            </Block>
+    )
+}
+
 
 // styles
 const styles = StyleSheet.create({
@@ -409,6 +530,10 @@ const styles = StyleSheet.create({
         justifyContent:'center',
         alignItems:'center'
     },
+    locationButton:{
+        bottom:140,
+        right:10,
+    },  
     addButton:{
         bottom:40,
         right:10,
@@ -443,6 +568,19 @@ const styles = StyleSheet.create({
     modalBody:{
         marginTop:-40,
         borderRadius:theme.sizes.radius
+    },
+    alertForm:{
+        zIndex:2,
+        top:0,
+        bottom:0,
+        left:0,
+        right:0,
+        backgroundColor:theme.colors.white
+    },
+    input:{
+        borderTopWidth:0,
+        borderRightWidth:0,
+        borderLeftWidth:0
     },
     actionButton:{
         height:40,

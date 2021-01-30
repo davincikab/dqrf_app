@@ -57,6 +57,7 @@ export default class Login extends React.Component {
     }
 
     async handleLogin(username, password) {
+        console.log("Logging In");
         let auth = new Authentication();
         let response = await auth.login(username, password);
 
@@ -66,7 +67,7 @@ export default class Login extends React.Component {
             this.setState({
                 loading:false
             }, () => {
-                // this.props.navigation.navigate("Tab", { screen:"Map" });
+                this.props.navigation.navigate("Tab", { screen:"Map" });
                 this.props.newJWT(response.data.key);
             });
 
@@ -125,7 +126,7 @@ export default class Login extends React.Component {
                         onChangeText={text => this.setState({password:text, errors:[]})}
                     />
 
-                    <Button color={theme.colors.accent} onPress={this.handleSubmit}>
+                    <Button color={theme.colors.primary} onPress={this.handleSubmit}>
                         { loading && <ActivityIndicator size="small" color={theme.colors.white} />}
                         {!loading && 
                             <Typography center white>

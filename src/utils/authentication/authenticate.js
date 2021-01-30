@@ -1,14 +1,15 @@
 
 import axios from 'axios';
-const API_URL = 'https://202f6cf355c6.ngrok.io'
+const API_URL = 'https://0ddb2ff32618.ngrok.io'
 const LOGIN_URL = API_URL + '/api/v1/rest-auth/login/';
 const REGISTER_URL = API_URL + '/api/v1/rest-auth/registration/';
 const ALERTS_URL = API_URL + '/api/v1/';
+const ALERT_CHATS_URL = API_URL + '/api/v1/messages/';
 // const UPDATE_PROFILE = 
 
 export default class Authentication {
-    constructor() {
-        // this.
+    constructor(token="") {
+        this.token = token;
     }
 
     login = (username, password) => {
@@ -31,6 +32,7 @@ export default class Authentication {
         })
         .catch(error => {
             // failed registration
+            console.log(response.data);
             return error.response;
         });
     }
@@ -52,6 +54,53 @@ export default class Authentication {
             return [];
         });
     }
+
+    createAlert = (token, alert) => {
+        let headers = {
+            "Authorization": `Token ${token}`
+        };
+
+        // {Authorization: `Bearer ${token)}`};
+
+        console.log("Creating Alert");
+        console.log(token);
+        return axios.post(
+            ALERTS_URL,
+            alert,
+            {headers:headers}
+        ).then(response => {
+            console.log(response);
+            return response;
+        })
+        .catch(error => {
+            console.log(error.response);
+            // failed registration
+            return [];
+        });
+    }
+
+    getAlertChats = (token, alert_id) => {
+        let headers = {
+            "Authorization": `Token ${token}`
+        };
+
+        let url =  ALERTS_URL + alert_id + '/';
+        console.log(url);
+        return axios.get(
+            url,
+            {headers:headers}
+        ).then(response => {
+            console.log(response);
+            return response.data.features;
+        })
+        .catch(error => {
+            console.log(error.response);
+            // failed registration
+            return [];
+        });
+    }
+
+
 
 }
 

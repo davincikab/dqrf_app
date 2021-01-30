@@ -148,7 +148,7 @@ export default class Cells extends React.Component {
         return(
             <Block style={styles.container} >
                 <Block center 
-                    color={theme.colors.accent} shadow 
+                    color={theme.colors.primary} shadow 
                     flex={false} 
                     style={styles.header}
                     padding={[0,10]}

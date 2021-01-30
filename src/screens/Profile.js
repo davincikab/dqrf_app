@@ -27,7 +27,7 @@ export default class Profile extends React.Component {
         const { profile } = this.state;
         return (
             <Block style={styles.container} color={theme.colors.white}>
-                <Block flex={0.8} center middle color={theme.colors.accent}>
+                <Block flex={0.8} center middle color={theme.colors.primary}>
                     {/* <Image source={} /> */}
                     <Icon name="user-circle" size={80} color={theme.colors.white}/>
                     <Typography title white>

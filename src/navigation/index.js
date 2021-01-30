@@ -15,7 +15,9 @@ import Welcome from '../screens/Welcome';
 import Cells from '../screens/Cells';
 import Alerts from '../screens/Alerts';
 import Profile from '../screens/Profile';
-import EditCells from '../screens/EditCells'
+import EditCells from '../screens/EditCells';
+import AlertCreateModal from '../screens/AlertCreate';
+import AlertChat from '../screens/AlertChat';
 
 import { theme } from '../constants';
 
@@ -64,9 +66,9 @@ function TabNavigator(props) {
             }) 
             }
         >
-            {/* <Tab.Screen name="Map" >
+            <Tab.Screen name="Map" >
                 { props => <Map {...props} jwt={jwt} />}
-            </Tab.Screen> */}
+            </Tab.Screen>
             
             <Tab.Screen name="Alerts" >
                 { props => <Alerts {...props} jwt={jwt} />}
@@ -143,6 +145,24 @@ function AuthenticatedNavigator(props) {
                     options={{
                         title:"",
                         headerShown:true,
+                    }}
+                />
+
+                <Stack.Screen 
+                    name="Create Alert" 
+                    component={AlertCreateModal}
+                    options={{
+                        title:"",
+                        headerShown:false,
+                    }}
+                />
+
+                <Stack.Screen 
+                    name="Alert Chat" 
+                    component={AlertChat}
+                    options={{
+                        title:"",
+                        headerShown:false,
                     }}
                 />
 
