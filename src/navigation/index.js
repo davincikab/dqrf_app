@@ -36,12 +36,12 @@ const screenOptions = {
 };
 
 const Navigator = (props) => {
-    const { jwt, newJWT } = props;
+    const { jwt, user, newJWT } = props;
     return  (
         <NavigationContainer>
                 { jwt ?  
-                    <AuthenticatedNavigator jwt={jwt} newJWT={(token) => newJWT(token)}/> :
-                    <NonAuthenticatedNavigator jwt={jwt} newJWT={(token) => newJWT(token)}/>
+                    <AuthenticatedNavigator jwt={jwt} user={user} newJWT={(token) => newJWT(token)}/> :
+                    <NonAuthenticatedNavigator jwt={jwt} user={user} newJWT={(token) => newJWT(token)}/>
                 }  
         </NavigationContainer>
     );
@@ -53,7 +53,7 @@ export default Navigator;
 // TAB NAVIGATION
 const Tab = createBottomTabNavigator();
 function TabNavigator(props) {
-    const { jwt } = props;
+    const { jwt, user } = props;
     return(
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -67,22 +67,22 @@ function TabNavigator(props) {
             }
         >
             <Tab.Screen name="Map" >
-                { props => <Map {...props} jwt={jwt} />}
+                { props => <Map {...props} jwt={jwt} user={user}/>}
             </Tab.Screen>
             
             <Tab.Screen name="Alerts" >
-                { props => <Alerts {...props} jwt={jwt} />}
+                { props => <Alerts {...props} jwt={jwt} user={user}/>}
             </Tab.Screen>  
 
             <Tab.Screen name="Cells">
-                { props => <Cells {...props} jwt={jwt} />}
+                { props => <Cells {...props} jwt={jwt} user={user}/>}
             </Tab.Screen>   
         </Tab.Navigator>
     )
 }
 
 function NonAuthenticatedNavigator(props) {
-    const { jwt, newJWT } = props;
+    const { jwt, user, newJWT } = props;
     return (
         <Stack.Navigator
             screenOptions={screenOptions}
@@ -116,14 +116,14 @@ function NonAuthenticatedNavigator(props) {
                         headerShown:true,
                     }}
                 >
-                    { props => <Login {...props} jwt={jwt} newJWT={(token) => newJWT(token)} /> }
+                    { props => <Login {...props} jwt={jwt} user={user} newJWT={(token) => newJWT(token)} /> }
                 </Stack.Screen>
         </Stack.Navigator>
     )
 }
 
 function AuthenticatedNavigator(props) {
-    const { jwt, newJWT } = props;
+    const { jwt, user, newJWT } = props;
     return (
         <Stack.Navigator
             screenOptions={screenOptions}
@@ -136,43 +136,57 @@ function AuthenticatedNavigator(props) {
                         headerShown:false,
                     }}
                 >
-                    {props => <TabNavigator jwt={jwt} /> }
+                    {props => <TabNavigator {...props} jwt={jwt} user={user}/> }
                 </Stack.Screen> 
 
                 <Stack.Screen 
                     name="Profile" 
-                    component={Profile}
                     options={{
                         title:"",
                         headerShown:true,
                     }}
-                />
+                    >
+                    {props => <Profile {...props} jwt={jwt} user={user}/> }
+               </Stack.Screen>
 
                 <Stack.Screen 
                     name="Create Alert" 
-                    component={AlertCreateModal}
                     options={{
                         title:"",
                         headerShown:false,
                     }}
-                />
+                >
+                     {props => <AlertCreateModal {...props} jwt={jwt} user={user}/> }
+                </Stack.Screen>
 
                 <Stack.Screen 
                     name="Alert Chat" 
-                    component={AlertChat}
                     options={{
                         title:"",
                         headerShown:false,
                     }}
-                />
+                >
+                    {props => <AlertChat {...props} jwt={jwt} user={user}/> }
+               </Stack.Screen>
 
                 <Stack.Screen 
                     name="EditCells" 
-                    component={EditCells}
                     options={{
                         title:"",
                         headerShown:true,
                     }}
+                >
+                     {props => <EditCells {...props} jwt={jwt} user={user}/> }
+                </Stack.Screen>
+
+                <Stack.Screen 
+                    name="Welcome" 
+                    component={Welcome}
+                    options={{
+                        title:null,
+                        headerShown:false
+                    }}
+
                 />
         </Stack.Navigator>
     )

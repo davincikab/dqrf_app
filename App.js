@@ -11,6 +11,7 @@ export default class App extends React.Component {
 
     this.state = {
       jwt:'',
+      user:{},
       loading:true
     }
 
@@ -28,9 +29,11 @@ export default class App extends React.Component {
 
   async loadJWT () {
     let jwt = await deviceStorage.loadJWT('id_token');
+    let user = await deviceStorage.loadUser('id_user');
     
     this.setState({
-      jwt
+      jwt,
+      user
     });
   }
 
@@ -39,10 +42,10 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { jwt } = this.state;
+    const { jwt, user } = this.state;
 
     return (
-      <Navigator jwt={jwt} newJWT={this.newJWT} />
+      <Navigator jwt={jwt} user={user} newJWT={this.newJWT} />
     );
   }
 }

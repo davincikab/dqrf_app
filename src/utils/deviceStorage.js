@@ -1,9 +1,9 @@
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default deviceStorage = {
-    async saveItem (value) {
+    async saveItem (id, value) {
         try {
-            await AsyncStorage.setItem('id_token', value);
+            await AsyncStorage.setItem(id, value);
         } catch (error) {
             console.log("Error: " + error.message);
         }
@@ -26,5 +26,16 @@ export default deviceStorage = {
         } catch (error) {
             console.log("Error: " + error.message);
         } 
+    },
+
+    async loadUser(key) {
+        try {
+            const value = await AsyncStorage.getItem(key);
+
+            return value;
+        } catch (error) {
+            console.log("Error: " + error.message);
+            return "";
+        }
     }
 }

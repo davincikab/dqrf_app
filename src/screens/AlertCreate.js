@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, Picker, ActivityIndicator} from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator} from 'react-native';
+import { Picker } from '@react-native-community/picker';
 
 // 3rd party depenencies
 import Icon from 'react-native-vector-icons/FontAwesome';

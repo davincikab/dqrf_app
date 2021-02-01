@@ -9,12 +9,17 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import Typography from '../components/Text';
 import { theme, profile } from '../constants';
-
+import deviceStorage from '../utils/deviceStorage';
 
 export default class Profile extends React.Component {
     state = {
         profile:{},
         loading:false
+    }
+
+    handleLogout = () => {
+        deviceStorage.deleteJWT('id_token');
+        this.props.navigation.navigate('Welcome');
     }
 
     componentDidMount() {
@@ -24,7 +29,7 @@ export default class Profile extends React.Component {
     }
 
     render() {
-        const { profile } = this.state;
+        const { profile, loading } = this.state;
         return (
             <Block style={styles.container} color={theme.colors.white}>
                 <Block flex={0.8} center middle color={theme.colors.primary}>
@@ -52,7 +57,16 @@ export default class Profile extends React.Component {
                     <Block shadow center padding={[0, 10]} style={{flexDirection:'row',elevation:2}} flex={0.2}>
                         <Icon name="info-circle" size={20} color={theme.colors.accent} />
                         <Typography title style={styles.marginLeft}>{profile.reg_no}</Typography>
-                    </Block>                   
+                    </Block>  
+
+                    <Button color={theme.colors.primary} onPress={this.handleLogout}>
+                        { loading && <ActivityIndicator size="small" color={theme.colors.white} />}
+                        {!loading && 
+                            <Typography center white>
+                                Logout
+                            </Typography>
+                        }
+                    </Button>                 
                 </Block>
             </Block>
         )

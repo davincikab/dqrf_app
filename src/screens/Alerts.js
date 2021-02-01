@@ -57,12 +57,13 @@ export default class Alerts extends React.Component {
 
     // navigate to alert chat
     navigateToChatAlert = (alert) => {
-        const { jwt } = this.props;
+        const { jwt, user } = this.props;
 
         console.log(alert.properties);
         this.props.navigation.navigate('Alert Chat', {
             token:jwt,
-            alert:alert.properties
+            alert:alert.properties,
+            user:user
         });
 
     }

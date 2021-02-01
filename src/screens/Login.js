@@ -18,7 +18,7 @@ export default class Login extends React.Component {
         this.handleLogin = this.handleLogin.bind(this);
 
         this.state = {
-            username:'katheri',
+            username:'daudi',
             password:'477jesusc',
             errors:{},
             loading:false
@@ -62,7 +62,9 @@ export default class Login extends React.Component {
         let response = await auth.login(username, password);
 
         if(response.status == 201 || response.status == 200) {
-            deviceStorage.saveItem(response.data.key);
+            // console.log(response.config.data);
+            deviceStorage.saveItem('id_token', response.data.key);
+            deviceStorage.saveItem('id_user', username);
 
             this.setState({
                 loading:false
