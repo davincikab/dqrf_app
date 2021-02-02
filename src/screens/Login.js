@@ -58,20 +58,29 @@ export default class Login extends React.Component {
 
     async handleLogin(username, password) {
         console.log("Logging In");
-        let auth = new Authentication();
-        let response = await auth.login(username, password);
+        let api = new Authentication();
+        let response = await api.login(username, password);
 
         if(response.status == 201 || response.status == 200) {
             // console.log(response.config.data);
             deviceStorage.saveItem('id_token', response.data.key);
-            deviceStorage.saveItem('id_user', username);
+            // deviceStorage.saveItem('id_user', username);
 
-            this.setState({
-                loading:false
-            }, () => {
-                this.props.navigation.navigate("Tab", { screen:"Map" });
-                this.props.newJWT(response.data.key);
-            });
+            let userInfo = await api.getUser(response.data.key, username);
+            
+            if(response.status == 201 || response.status == 200) {
+                console.log(userInfo);
+                deviceStorage.saveItem('id_user', JSON.stringify(userInfo));
+
+                this.setState({
+                    loading:false
+                }, () => {
+                    this.props.navigation.navigate("Tab", { screen:"Alerts" });
+                    this.props.newJWT(response.data.key);
+                });
+
+            }
+            
 
             
         }

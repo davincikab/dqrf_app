@@ -1,8 +1,9 @@
 import React from 'react';
-import {StyleSheet, FlatList } from 'react-native';
+import {StyleSheet, FlatList, Keyboard } from 'react-native';
 
 // 3rd party depenencies
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 // active
 import Input from '../components/Input';
@@ -29,9 +30,11 @@ export default class AlertChat extends React.Component {
             value:'',
             allChats:[],
             chats:[],
-            username:"",
+            user:"",
             text:"",
-            isValid:false
+            alert:{},
+            isValid:false,
+            token:""
         };
 
         this.api = new Authentication();
@@ -48,6 +51,15 @@ export default class AlertChat extends React.Component {
         this.props.navigation.goBack();
     }
 
+    handleCamera = () => {
+        launchCamera({
+            maxHeight:550,
+            maxWidth:720
+        }, function(res) {
+            console.log(res);
+        });
+    }
+
     onChangeMessage = (text) => {
         let isValid = text != "" ? true : false;
 
@@ -57,35 +69,47 @@ export default class AlertChat extends React.Component {
         });
     }
 
-    handlSubmit() {
-        // get the text from the 
+    handleSubmit = ()  => {
+        // get the text from the
+        let { user, text, alert} = this.state;
+
+        let message = {
+            text:text,
+            author:user.pk,
+            alert:alert.pk
+        };
+
+        console.log(message);
+        this.handleAlertMessage(message);
     }
 
-    isSameMonth = (previousItem, currentItem) => {
-        return new Date(previousItem.time).getMonth() == new Date(currentItem.time).getMonth();
+    handleAlertMessage = async (message) => {
+        const { token,  alert} = this.state;
+        let response = await this.api.sendAlertMessage(token, alert.pk, message);
+
+        // console.log(response);
+        if(response.alert) {
+            console.log("success");
+            let { chats }  = this.state;
+            chats.push(response);
+
+            this.setState({
+                text:"",
+                isValid:false,
+                chats
+            });
+
+            // redirect to map
+            // props.navigation.navigate("Map");
+        }
+
+        if(response.status == 400 || response.status == 403 || response.status == 404) {
+            console.log("Error");
+        }
     }
 
-    renderItem = ({index, item}) => {
-        let time = new Date(item.time);
-        console.log(time.toUTCString());
-        let { username } = this.state;
-
-        let cardStyle = username == item.username ? styles.cardRight : styles.cardLeft;
-        let month = monthNames[time.getMonth()];
-        let day = time.getDay();
-
-        let isSameMonth = this.state.chats[index - 1] ? this.isSameMonth(item, this.state.chats[index - 1]) : false;
-
-        return (
-            <Block>
-                 {!isSameMonth && <Typography center middle style={styles.monthStyle}>{month} {day}</Typography>}
-                <Card style={cardStyle}>
-                    <Typography style={styles.userName}>{item.username}</Typography>
-                    <Typography>{item.text}</Typography>
-                    <Typography style={styles.timeStamp}>{time.getHours()}:{time.getMinutes()}</Typography>
-                </Card>
-            </Block>
-        )
+    isSameDay = (previousItem, currentItem) => {
+        return new Date(previousItem.time).getDay() == new Date(currentItem.time).getDay();
     }
 
     async getAlertChats(token, alert_id) {
@@ -99,7 +123,8 @@ export default class AlertChat extends React.Component {
     }
 
     contentChanged = () =>{
-        console.log(this.messageRef);
+        // console.log(this.messageRef);
+        this.messageRef.current.scrollToEnd();
     }
 
     componentDidMount() {
@@ -109,14 +134,48 @@ export default class AlertChat extends React.Component {
         console.log("User: " + user);
 
         this.setState({
-            username:user
+            user:JSON.parse(user),
+            alert:alert,
+            token:token
         });
 
         this.getAlertChats(token, alert.pk);
+
+        this.keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            this._keyboardDidShow,
+        );
+    }
+
+    _keyboardDidShow() {
+        // alert('Keyboard Shown');
+        this.messageRef.current.scrollToEnd();
+    }
+
+    renderItem = ({index, item}) => {
+        let time = new Date(item.time);
+        let { user } = this.state;
+
+        let cardStyle = user.username == item.username ? styles.cardRight : styles.cardLeft;
+        let month = monthNames[time.getMonth()];
+        let day = time.getDay();
+
+        let isSameDay = this.state.chats[index - 1] ? this.isSameDay(item, this.state.chats[index - 1]) : false;
+
+        return (
+            <Block>
+                 {!isSameDay && <Typography center middle style={styles.monthStyle}>{month} {day}</Typography>}
+                <Card style={cardStyle} shadow>
+                    <Typography style={styles.userName}>{item.username}</Typography>
+                    <Typography>{item.text}</Typography>
+                    <Typography style={styles.timeStamp}>{time.getHours()}:{time.getMinutes()}</Typography>
+                </Card>
+            </Block>
+        )
     }
 
     render() {
-        const { chats, text, isValid } = this.state;
+        const { chats, text, alert, isValid } = this.state;
         return(
             <Block style={styles.container} >
                 <Block center 
@@ -133,11 +192,12 @@ export default class AlertChat extends React.Component {
                             <Icon name="long-arrow-left" size={18} color={theme.colors.white} />
                         </Button>
                     </Block>
-                    <Block flex={0.6}>
+                    <Block flex={0.6} style={{flexDirection:'column'}}>
                         <Typography h2 white>Alerts Chat</Typography>
+                        <Typography small white>{alert.username}</Typography>
                     </Block>
 
-                    <Button flex={0.1} onPress={this.handleProfile} color={theme.colors.transparent}>
+                    <Button flex={0.1} onPress={this.handleCamera} color={theme.colors.transparent}>
                         <Icon name="camera" size={30} color={theme.colors.white} />
                     </Button>
 
@@ -195,24 +255,26 @@ const styles = StyleSheet.create({
         justifyContent:'space-between',
     },
     cardLeft:{
-        justifyContent:"flex-end",
+        justifyContent:"flex-start",
         width:"50%",
         marginRight:"50%",
         paddingTop:4,
         paddingHorizontal:4,
         paddingBottom:18,
-        marginHorizontal:10
+        // marginHorizontal:10
     },
     cardRight:{
         justifyContent:"flex-end",
         width:"50%",
         marginLeft:"50%",
-        padding:4,
-        marginHorizontal:10
+        paddingHorizontal:4,
+        paddingTop:4,
+        // marginHorizontal:10
     },
     messageList:{
         flex:0.8,
         paddingVertical:6,
+        paddingHorizontal:8,
         backgroundColor:theme.colors.gray2
     },
     inputGroup:{
@@ -241,3 +303,7 @@ const styles = StyleSheet.create({
         color:theme.colors.white
     }
 });
+
+// TODO:
+// connect to websocket and update the text
+// add react-native image picker
