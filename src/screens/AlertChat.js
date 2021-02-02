@@ -106,6 +106,59 @@ export default class AlertChat extends React.Component {
       
     }
 
+    handleCamera = async() => {
+        let { user, text, alert} = this.state;
+
+        // get permission
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, 
+            );
+
+            if(granted === PermissionsAndroid.RESULTS.GRANTED) {
+                launchImageLibrary({
+                    maxHeight:550,
+                    maxWidth:720
+                }, (res) => {
+                    console.log(res);
+        
+                    // create a message instance
+                    let message = {
+                        // pk:chats[chats.length -1].pk + 1,
+                        text:text,
+                        author:user.pk,
+                        alert:alert.pk,
+                        // username:user.username,
+                        image:{
+                            type:res.type,
+                            name:res.fileName,
+                            uri:res.uri
+                        },
+                        // time:new Date().toISOString()
+                    };
+
+                    let data = new FormData();
+                    data.append("image", message.image);
+                    data.append("author", message.author);
+                    data.append("alert", message.alert);
+
+                    // push the message to chat
+                    // chats.push(message);
+        
+                    // upload the image
+                    // this.setState({chats})
+                    this.handleAlertMessage(data);
+        
+                });
+            } else {
+                console.log("permision denied");
+            }
+        } catch (error) {
+            
+        }
+        
+    }
+
     onChangeMessage = (text) => {
         let isValid = text != "" ? true : false;
 
@@ -261,7 +314,7 @@ export default class AlertChat extends React.Component {
                         <Typography small white>{alert.username}</Typography>
                     </Block>
 
-                    <Button flex={0.1} onPress={this.handleCamera} color={theme.colors.transparent}>
+                    <Button flex={0.1} onPress={this.handleImageLibrary} color={theme.colors.transparent}>
                         <Icon name="paperclip" size={20} color={theme.colors.white} />
                     </Button>
 
