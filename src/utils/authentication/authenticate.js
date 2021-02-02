@@ -1,9 +1,10 @@
 
 import axios from 'axios';
-const API_URL = 'https://8fe906db8731.ngrok.io';
+const API_URL = 'https://a95819312b7b.ngrok.io';
 const LOGIN_URL = API_URL + '/api/v1/rest-auth/login/';
 const REGISTER_URL = API_URL + '/api/v1/rest-auth/registration/';
 const ALERTS_URL = API_URL + '/api/v1/';
+const ALERTS_IMAGE_URL = API_URL + '/api/v1/alert_image/';
 const ALERT_CHATS_URL = API_URL + '/api/v1/messages/';
 const USER_URL = API_URL + '/api/v1/users/'
 // const UPDATE_PROFILE = 
@@ -87,7 +88,7 @@ export default class Authentication {
             alert,
             {headers:headers}
         ).then(response => {
-            console.log(response);
+            console.log(response.data);
             return response;
         })
         .catch(error => {
@@ -95,6 +96,28 @@ export default class Authentication {
             // failed registration
             return [];
         });
+    }
+
+    updateAlertImage = (token, alert_id, image) => {
+        let headers = {
+            "Authorization": `Token ${token}`
+        };
+
+        let url = ALERTS_IMAGE_URL + alert_id +'/';
+
+        return axios.post(
+            url,
+            image,
+            { headers:headers }
+        ).then(response => {
+            console.log(response);
+            return response;
+        })
+        .catch(error => {
+            console.log(error.response);
+            // failed registration
+            return [];
+        });   
     }
 
     getAlertChats = (token, alert_id) => {

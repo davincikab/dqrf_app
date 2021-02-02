@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, ActivityIndicator} from 'react-native';
+import { Image, StyleSheet, ActivityIndicator, PermissionsAndroid} from 'react-native';
 import { Picker } from '@react-native-community/picker';
 
 // 3rd party depenencies
+// 3rd party depenencies
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 // components
 import Input from '../components/Input';
@@ -22,6 +24,7 @@ const ALERT_FIELDS = {
     loading:false,
     formIsValid:false,
     token:'',
+    alertImages:[],
     alert:{
         reported_by:{
             value:'',
@@ -114,6 +117,86 @@ export default AlertCreateModal = function(props) {
         setState(currentState);
     }
 
+    // images section
+    const handleCamera = async() => {
+        let currentState = {...state};
+        let { alertImages } = currentState;
+
+        // get permission
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.CAMERA, 
+            );
+
+            if(granted === PermissionsAndroid.RESULTS.GRANTED) {
+                launchCamera({
+                    maxHeight:550,
+                    maxWidth:720
+                }, (res) => {
+                    console.log(res);
+
+                    alertImages.push(
+                        {
+                            type:res.type,
+                            name:res.fileName,
+                            uri:res.uri
+                        }
+                    );
+
+                    // update state
+                    currentState.alertImages = alertImages;
+                    setState(currentState);
+                });
+            } else {
+                console.log("permision denied");
+            }
+        } catch (error) {
+            
+        }
+        
+      
+    }
+
+    const handleImageLibrary = async() => {
+        let currentState = {...state};
+        let { alertImages } = currentState;
+
+        // get permission
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, 
+            );
+
+            if(granted === PermissionsAndroid.RESULTS.GRANTED) {
+                launchImageLibrary({
+                    maxHeight:550,
+                    maxWidth:720
+                }, (res) => {
+                    console.log(res);
+        
+                    // create a message instance
+                    alertImages.push(
+                        {
+                            type:res.type,
+                            name:res.fileName,
+                            uri:res.uri
+                        }
+                    );
+
+                    // update state
+                    currentState.alertImages = alertImages;
+                    setState(currentState);
+        
+                });
+            } else {
+                console.log("permision denied");
+            }
+        } catch (error) {
+            
+        }
+        
+    }
+
     const handleSubmit = () => {
         // get the form values
         let { alert } = state;
@@ -145,13 +228,39 @@ export default AlertCreateModal = function(props) {
         // console.log(response);
         if(response.status == 201 || response.status == 200) {
             console.log("success");
+            let commitedAlert = response.data;
+
+            let { alertImages } = state;
+            if(alertImages.length > 0) {
+
+                for (let index = 0; index < alertImages.length; index++) {
+                    let image = alertImages[index];
+
+                    let fd = new FormData();
+                    fd.append('image', image);
+                    fd.append('alert', commitedAlert.properties.pk);
+
+                    let response = await auth.updateAlertImage(state.token, commitedAlert.properties.pk, fd);
+
+                    if(response.status == 201 || response.status == 200) {
+                        console.log("Update sucess");
+
+                        if(index == alertImages.length -1) {
+                          props.navigation.navigate("Alerts");   
+                        }
+                    } else {
+                        console.log("upload failed");
+                    }
+                }
+            }
 
             // redirect to map
-            props.navigation.navigate("Map");
+            // props.navigation.navigate("Map");
         }
 
         if(response.status == 400 || response.status == 403 || response.status == 404) {
             console.log("Error");
+            alert("Failed to create alert");
         }
     }
 
@@ -186,9 +295,9 @@ export default AlertCreateModal = function(props) {
             </Block>
 
                 <Block middle style={styles.alertForm}>
-                    < Typography>
+                    <Typography>
                         Emergency Type
-                    </ Typography>
+                    </Typography>
                     <Picker
                         selectedValue={state.alert.emergency_type.value}
                         style={styles.input}
@@ -219,6 +328,39 @@ export default AlertCreateModal = function(props) {
                         style={styles.input}
                         onChangeText={text => handleTextChange('location_name', text)}
                     />
+
+                    <Typography>Images</Typography>
+                    <Block style={styles.imageSection}>
+                        {state.alertImages.map((image, index) => (
+                            <Block key={index}>
+                               <Image
+                                    style={styles.imageThumb}
+                                    source={{uri: image.uri }}
+                                />
+                            </Block>
+                        ))}
+                    </Block>
+
+                    <Block style={{flexDirection:"row"}}>
+                        <Button 
+                            // flex={0.4} 
+                            onPress={handleImageLibrary} 
+                            color={theme.colors.primary}
+                            style={styles.actionButton}
+                        >
+                            <Icon name="paperclip" size={25} color={theme.colors.white} />
+                        </Button>
+
+                        <Button 
+                            // flex={0.4} 
+                            onPress={handleCamera} 
+                            color={theme.colors.primary}
+                            style={styles.actionButton}
+                        >
+                            <Icon name="camera" size={25} color={theme.colors.white} />
+                        </Button>
+                    </Block>
+                    
 
                     <Button 
                         color={!state.formIsValid ? theme.colors.gray : theme.colors.primary}
@@ -269,4 +411,11 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         // justifyContent:'space-between',
     },
+    imageSection:{
+        flexDirection:"row"
+    },
+    imageThumb:{
+        height:80,
+        width:80
+    }
 });

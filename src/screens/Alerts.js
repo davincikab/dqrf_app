@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, FlatList } from 'react-native';
+import {StyleSheet, FlatList, Image } from 'react-native';
 
 // 3rd party depenencies
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -73,7 +73,7 @@ export default class Alerts extends React.Component {
         let time = new Date(item.properties.time);
     
         return (
-            <Card>
+            <Card style={styles.card}>
                 <Block style={styles.cardHeader}>
                     <Icon name={iconName} size={30} color={theme.colors.accent}/>
                     <Typography title style={styles.cardTitle}>{item.properties.emergency_type}</Typography>
@@ -86,24 +86,36 @@ export default class Alerts extends React.Component {
                         <Icon name="whatsapp" size={18} color={ theme.colors.white}/>
                     </Button>
                 </Block>
-                <Block>
-                    <Typography>{item.properties.description}</Typography>
-                    <Block style={{ flexDirection:'row'}} margin={[2,0]}>
-                        <Icon name="map-marker" size={18} color={ theme.colors.black} />
-                        <Typography black style={styles.marginLeft}>
-                            {item.properties.location_name} 
-                        </Typography>
+                <Block style={styles.cardBody}>
+                    <Block>
+                        {item.properties.alert_image.map((image, index) => (
+                            <Image 
+                                key={index}
+                                style={styles.image}
+                                source={{
+                                    uri:image.image
+                                }}
+                            />
+                        ))}
                     </Block>
+                    <Block style={{paddingHorizontal:4}}>
+                        <Typography>{item.properties.description}</Typography>
+                        <Block style={{ flexDirection:'row'}} margin={[2,0]}>
+                            <Icon name="map-marker" size={18} color={ theme.colors.black} />
+                            <Typography black style={styles.marginLeft}>
+                                {item.properties.location_name} 
+                            </Typography>
+                        </Block>
 
-                    <Block style={{ flexDirection:'row'}} space={"between"} margin={[2,0]}>
-                        <Typography small gray>
-                            {item.properties.username}
-                        </Typography>
-                        <Typography small gray>
-                            {time.getHours()}:{time.getMinutes()}
-                        </Typography>
+                        <Block style={{ flexDirection:'row'}} space={"between"} margin={[2,0]}>
+                            <Typography small gray>
+                                {item.properties.username}
+                            </Typography>
+                            <Typography small gray>
+                                {time.getHours()}:{time.getMinutes()}
+                            </Typography>
+                        </Block>
                     </Block>
-
                 </Block>
             </Card>
         )
@@ -183,11 +195,15 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-between',
     },
+    card:{
+        padding:0
+    },
     cardHeader:{
         flexDirection:'row',
         justifyContent:'flex-start',
         alignItems:'center',
-        marginVertical:4
+        marginVertical:4,
+        paddingHorizontal:4
     },
     cardTitle:{
         marginLeft:10
@@ -201,7 +217,7 @@ const styles = StyleSheet.create({
     },
     actionButton:{
         position:'absolute',
-        top:0,
+        top:-5,
         right:0,
         height:30,
         width:30,
@@ -211,4 +227,7 @@ const styles = StyleSheet.create({
         marginHorizontal:4,
         elevation:1
     },
+    image:{
+        height:150
+    }
 });

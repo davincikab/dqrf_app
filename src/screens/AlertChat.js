@@ -70,29 +70,22 @@ export default class AlertChat extends React.Component {
         
                     // create a message instance
                     let message = {
-                        // pk:chats[chats.length -1].pk + 1,
                         text:text,
                         author:user.pk,
                         alert:alert.pk,
-                        // username:user.username,
                         image:{
                             type:res.type,
                             name:res.fileName,
                             uri:res.uri
                         },
-                        // time:new Date().toISOString()
                     };
 
                     let data = new FormData();
                     data.append("image", message.image);
                     data.append("author", message.author);
                     data.append("alert", message.alert);
-
-                    // push the message to chat
-                    // chats.push(message);
         
                     // upload the image
-                    // this.setState({chats})
                     this.handleAlertMessage(data);
         
                 });
@@ -106,7 +99,7 @@ export default class AlertChat extends React.Component {
       
     }
 
-    handleCamera = async() => {
+    handleImageLibrary = async() => {
         let { user, text, alert} = this.state;
 
         // get permission
@@ -124,11 +117,9 @@ export default class AlertChat extends React.Component {
         
                     // create a message instance
                     let message = {
-                        // pk:chats[chats.length -1].pk + 1,
                         text:text,
                         author:user.pk,
                         alert:alert.pk,
-                        // username:user.username,
                         image:{
                             type:res.type,
                             name:res.fileName,
@@ -141,12 +132,8 @@ export default class AlertChat extends React.Component {
                     data.append("image", message.image);
                     data.append("author", message.author);
                     data.append("alert", message.alert);
-
-                    // push the message to chat
-                    // chats.push(message);
         
                     // upload the image
-                    // this.setState({chats})
                     this.handleAlertMessage(data);
         
                 });
