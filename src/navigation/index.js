@@ -118,6 +118,17 @@ function NonAuthenticatedNavigator(props) {
                 >
                     { props => <Login {...props} jwt={jwt} user={user} newJWT={(token) => newJWT(token)} /> }
                 </Stack.Screen>
+                <Stack.Screen 
+                    name="Tab" 
+                    // component={TabNavigator}
+                    options={{
+                        title:"",
+                        headerShown:false,
+                    }}
+                >
+                    {props => <TabNavigator {...props} jwt={jwt} user={user}/> }
+                </Stack.Screen>
+                
         </Stack.Navigator>
     )
 }

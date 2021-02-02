@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-const API_URL = 'https://a35c661b1c02.ngrok.io';
+const API_URL = 'https://8fe906db8731.ngrok.io';
 const LOGIN_URL = API_URL + '/api/v1/rest-auth/login/';
 const REGISTER_URL = API_URL + '/api/v1/rest-auth/registration/';
 const ALERTS_URL = API_URL + '/api/v1/';

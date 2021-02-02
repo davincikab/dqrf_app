@@ -75,7 +75,7 @@ export default class Login extends React.Component {
                 this.setState({
                     loading:false
                 }, () => {
-                    this.props.navigation.navigate("Tab", { screen:"Alerts" });
+                    this.props.navigation.navigate("Tab", { screen:"Map" });
                     this.props.newJWT(response.data.key);
                 });
 

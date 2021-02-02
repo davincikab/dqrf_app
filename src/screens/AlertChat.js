@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, FlatList, Keyboard } from 'react-native';
+import {StyleSheet, FlatList, Keyboard, PermissionsAndroid, Image } from 'react-native';
 
 // 3rd party depenencies
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -32,6 +32,7 @@ export default class AlertChat extends React.Component {
             chats:[],
             user:"",
             text:"",
+            image:"",
             alert:{},
             isValid:false,
             token:""
@@ -51,13 +52,58 @@ export default class AlertChat extends React.Component {
         this.props.navigation.goBack();
     }
 
-    handleCamera = () => {
-        launchCamera({
-            maxHeight:550,
-            maxWidth:720
-        }, function(res) {
-            console.log(res);
-        });
+    handleCamera = async() => {
+        let { user, text, alert, chats} = this.state;
+
+        // get permission
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.CAMERA, 
+            );
+
+            if(granted === PermissionsAndroid.RESULTS.GRANTED) {
+                launchCamera({
+                    maxHeight:550,
+                    maxWidth:720
+                }, (res) => {
+                    console.log(res);
+        
+                    // create a message instance
+                    let message = {
+                        // pk:chats[chats.length -1].pk + 1,
+                        text:text,
+                        author:user.pk,
+                        alert:alert.pk,
+                        // username:user.username,
+                        image:{
+                            type:res.type,
+                            name:res.fileName,
+                            uri:res.uri
+                        },
+                        // time:new Date().toISOString()
+                    };
+
+                    let data = new FormData();
+                    data.append("image", message.image);
+                    data.append("author", message.author);
+                    data.append("alert", message.alert);
+
+                    // push the message to chat
+                    // chats.push(message);
+        
+                    // upload the image
+                    // this.setState({chats})
+                    this.handleAlertMessage(data);
+        
+                });
+            } else {
+                console.log("permision denied");
+            }
+        } catch (error) {
+            
+        }
+        
+      
     }
 
     onChangeMessage = (text) => {
@@ -76,7 +122,8 @@ export default class AlertChat extends React.Component {
         let message = {
             text:text,
             author:user.pk,
-            alert:alert.pk
+            alert:alert.pk,
+            image:""
         };
 
         console.log(message);
@@ -135,6 +182,7 @@ export default class AlertChat extends React.Component {
 
         this.setState({
             user:JSON.parse(user),
+            // user:user,
             alert:alert,
             token:token
         });
@@ -149,7 +197,7 @@ export default class AlertChat extends React.Component {
 
     _keyboardDidShow() {
         // alert('Keyboard Shown');
-        this.messageRef.current.scrollToEnd();
+        // this.messageRef ? this.messageRef.current.scrollToEnd() : "";
     }
 
     renderItem = ({index, item}) => {
@@ -157,6 +205,8 @@ export default class AlertChat extends React.Component {
         let { user } = this.state;
 
         let cardStyle = user.username == item.username ? styles.cardRight : styles.cardLeft;
+        // let sender = user.username == item.username ? "you" : item.username;
+
         let month = monthNames[time.getMonth()];
         let day = time.getDay();
 
@@ -164,12 +214,26 @@ export default class AlertChat extends React.Component {
 
         return (
             <Block>
-                 {!isSameDay && <Typography center middle style={styles.monthStyle}>{month} {day}</Typography>}
-                <Card style={cardStyle} shadow>
-                    <Typography style={styles.userName}>{item.username}</Typography>
-                    <Typography>{item.text}</Typography>
-                    <Typography style={styles.timeStamp}>{time.getHours()}:{time.getMinutes()}</Typography>
-                </Card>
+                {!isSameDay && <Typography center middle style={styles.monthStyle}>{month} {day}</Typography>}
+
+                {
+                    item.text != "" && <Card style={cardStyle} shadow>
+                        <Typography style={styles.userName}>{item.username}</Typography>
+                        <Typography>{item.text}</Typography>
+                        <Typography style={styles.timeStamp}>{time.getHours()}:{time.getMinutes()}</Typography>
+                    </Card>
+                }
+
+                {
+                    item.image && <Card style={cardStyle} shadow>
+                        <Typography style={styles.userName}>{item.username}</Typography>
+                        <Image
+                            style={styles.image}
+                            source={{uri: item.image }}
+                        />
+                         <Typography style={styles.timeStamp}>{time.getHours()}:{time.getMinutes()}</Typography>
+                    </Card>
+                }
             </Block>
         )
     }
@@ -198,11 +262,15 @@ export default class AlertChat extends React.Component {
                     </Block>
 
                     <Button flex={0.1} onPress={this.handleCamera} color={theme.colors.transparent}>
-                        <Icon name="camera" size={30} color={theme.colors.white} />
+                        <Icon name="paperclip" size={20} color={theme.colors.white} />
+                    </Button>
+
+                    <Button flex={0.1} onPress={this.handleCamera} color={theme.colors.transparent}>
+                        <Icon name="camera" size={20} color={theme.colors.white} />
                     </Button>
 
                     <Button flex={0.1} onPress={this.handleProfile} color={theme.colors.transparent}>
-                        <Icon name="user-circle" size={30} color={theme.colors.white} />
+                        <Icon name="user-circle" size={20} color={theme.colors.white} />
                     </Button>
 
                 </Block>
@@ -301,6 +369,10 @@ const styles = StyleSheet.create({
         marginHorizontal:100,
         borderRadius:3,
         color:theme.colors.white
+    },
+    image:{
+        width:"100%",
+        height:300
     }
 });
 
