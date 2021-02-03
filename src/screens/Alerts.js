@@ -136,6 +136,8 @@ export default class Alerts extends React.Component {
     }
 
     componentDidMount() {
+        // load alerts
+        console.log("Loading Alerts");
        this.getAlerts();
     }
 

@@ -18,13 +18,17 @@ export default class Profile extends React.Component {
     }
 
     handleLogout = () => {
+        deviceStorage.deleteJWT('id_user');
         deviceStorage.deleteJWT('id_token');
         this.props.navigation.navigate('Welcome');
     }
 
     componentDidMount() {
+        const { user } = this.props;
+        console.log(user);
+
         this.setState({
-            profile:profile
+            profile:JSON.parse(user)
         })
     }
 
@@ -42,7 +46,7 @@ export default class Profile extends React.Component {
                 <Block flex={0.4}>
                     <Block shadow center padding={[0, 10]} style={{flexDirection:'row',elevation:2}} flex={0.2}>
                         <Icon name="phone" size={20} color={theme.colors.accent} />
-                        <Typography title style={styles.marginLeft}>{profile.phone_number}</Typography>
+                        <Typography title style={styles.marginLeft}>{profile.mobile_no}</Typography>
                     </Block>  
                     <Block shadow center padding={[0, 10]} style={{flexDirection:'row',elevation:2}} flex={0.2}>
                         <Icon name="envelope" size={20} color={theme.colors.accent} />
@@ -50,16 +54,20 @@ export default class Profile extends React.Component {
                     </Block>
 
                     <Block shadow center padding={[0, 10]} style={{flexDirection:'row',elevation:2}} flex={0.2}>
-                        <Icon name="calendar" size={20} color={theme.colors.accent} />
-                        <Typography title style={styles.marginLeft}>{profile.age}</Typography>
-                    </Block>
-
-                    <Block shadow center padding={[0, 10]} style={{flexDirection:'row',elevation:2}} flex={0.2}>
                         <Icon name="info-circle" size={20} color={theme.colors.accent} />
-                        <Typography title style={styles.marginLeft}>{profile.reg_no}</Typography>
+                        <Typography title style={styles.marginLeft}>{profile.username}</Typography>
                     </Block>  
 
-                    <Button color={theme.colors.primary} onPress={this.handleLogout}>
+                    <Button 
+                        color={theme.colors.primary} 
+                        onPress={this.handleLogout} 
+                        style={{
+                            position:'absolute',
+                            bottom:0,
+                            width:"100%",
+                            borderRadius:0
+                        }}
+                    >
                         { loading && <ActivityIndicator size="small" color={theme.colors.white} />}
                         {!loading && 
                             <Typography center white>

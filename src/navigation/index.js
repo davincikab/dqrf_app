@@ -40,8 +40,8 @@ const Navigator = (props) => {
     return  (
         <NavigationContainer>
                 { jwt ?  
-                    <AuthenticatedNavigator jwt={jwt} user={user} newJWT={(token) => newJWT(token)}/> :
-                    <NonAuthenticatedNavigator jwt={jwt} user={user} newJWT={(token) => newJWT(token)}/>
+                    <AuthenticatedNavigator jwt={jwt} user={user} newJWT={(token, user) => newJWT(token, user)}/> :
+                    <NonAuthenticatedNavigator jwt={jwt} user={user} newJWT={(token, user) => newJWT(token, user)}/>
                 }  
         </NavigationContainer>
     );
@@ -60,7 +60,7 @@ function TabNavigator(props) {
                 tabBarIcon:({ focused, color, size }) => {
                     let iconName;
 
-                    iconName = route.name == "Map" ? 'map' : route.name == 'Alerts' ? 'exclamation-circle' : 'mobile';
+                    iconName = route.name == "Map" ? 'map' : route.name == 'Alerts' ? 'exclamation-circle' : 'user';
                     return <Icon name={iconName} size={size} color={color} />;
                 }
             }) 
@@ -74,8 +74,8 @@ function TabNavigator(props) {
                 { props => <Alerts {...props} jwt={jwt} user={user}/>}
             </Tab.Screen>  
 
-            <Tab.Screen name="Cells">
-                { props => <Cells {...props} jwt={jwt} user={user}/>}
+            <Tab.Screen name="Profile">
+                { props => <Profile {...props} jwt={jwt} user={user}/>}
             </Tab.Screen>   
         </Tab.Navigator>
     )
@@ -105,7 +105,7 @@ function NonAuthenticatedNavigator(props) {
                         headerShown:true,
                     }}
                 >
-                    { props => <SignUp {...props} newJWT={(token) => newJWT(token)} /> }
+                    { props => <SignUp {...props} newJWT={(token, user) => newJWT(token, user)} /> }
                 </Stack.Screen>
 
                 <Stack.Screen 
@@ -116,7 +116,7 @@ function NonAuthenticatedNavigator(props) {
                         headerShown:true,
                     }}
                 >
-                    { props => <Login {...props} jwt={jwt} user={user} newJWT={(token) => newJWT(token)} /> }
+                    { props => <Login {...props} jwt={jwt} user={user} newJWT={(token, user) => newJWT(token, user)} /> }
                 </Stack.Screen>
                 <Stack.Screen 
                     name="Tab" 

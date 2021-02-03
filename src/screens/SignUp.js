@@ -16,16 +16,16 @@ export default class SignUp extends React.Component {
         super(props);
 
         this.state = {
-            username:'gakuokama',
-            email:'gakuokama@gmail.com',
+            username:'B02-01-167_2020',
+            email:'gakukama@gmail.com',
             password:'477jesusc',
             password2:'477jesusc',
             errors:{},
             loading:false,
-            residence:'Mweiga',
+            residence:'Boma Area',
             mobile_no:'25423128756',
-            first_name:'Gakuo',
-            last_name:'Gakii'
+            first_name:'Gaku',
+            last_name:'Gaki'
         };
     
         this.handleRegister = this.handleRegister.bind(this);
@@ -91,8 +91,8 @@ export default class SignUp extends React.Component {
             // console.log(response);
 
             if(response.status == 201 || response.status == 200) {
-                deviceStorage.saveItem(response.data.key);
-                this.props.newJWT(response.data.key);
+                // deviceStorage.saveItem(response.data.key);
+                // this.props.newJWT(response.data.key);
 
                 this.setState({
                     loading:false

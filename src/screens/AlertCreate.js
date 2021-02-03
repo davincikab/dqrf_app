@@ -78,14 +78,14 @@ export default AlertCreateModal = function(props) {
     const [state, setState] = useState(ALERT_FIELDS);
     useEffect(() => {
         // route params value
-        let { route : { params } } = props;
-        console.log(params);
+        let { user, route : { params } } = props;
+        console.log(user.pk);
 
-        let { user, userLocation, token } = params;        
+        let { userLocation, token } = params;        
         // get the state object
         let currentState = {...state };
         currentState.token = token;
-        currentState.alert.reported_by.value = user;
+        currentState.alert.reported_by.value = JSON.parse(user).pk;
         currentState.alert.location.value = "SRID=4326;POINT ("+ userLocation.lng +" "+ userLocation.lat +")";
 
         // update the state
@@ -112,7 +112,7 @@ export default AlertCreateModal = function(props) {
         }
 
         currentState.formIsValid = formIsValid;
-        // console.log(currentState);
+        console.log(currentState);
 
         setState(currentState);
     }

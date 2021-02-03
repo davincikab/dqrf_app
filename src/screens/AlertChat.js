@@ -163,7 +163,6 @@ export default class AlertChat extends React.Component {
             text:text,
             author:user.pk,
             alert:alert.pk,
-            image:""
         };
 
         console.log(message);

@@ -18,7 +18,7 @@ export default class Login extends React.Component {
         this.handleLogin = this.handleLogin.bind(this);
 
         this.state = {
-            username:'daudi',
+            username:'B02-01-167_2020',
             password:'477jesusc',
             errors:{},
             loading:false
@@ -66,9 +66,9 @@ export default class Login extends React.Component {
             deviceStorage.saveItem('id_token', response.data.key);
             // deviceStorage.saveItem('id_user', username);
 
-            let userInfo = await api.getUser(response.data.key, username);
+            const userInfo = await api.getUser(response.data.key, username);
             
-            if(response.status == 201 || response.status == 200) {
+            if(userInfo.username) {
                 console.log(userInfo);
                 deviceStorage.saveItem('id_user', JSON.stringify(userInfo));
 
@@ -76,7 +76,7 @@ export default class Login extends React.Component {
                     loading:false
                 }, () => {
                     this.props.navigation.navigate("Tab", { screen:"Map" });
-                    this.props.newJWT(response.data.key);
+                    this.props.newJWT(response.data.key, JSON.stringify(userInfo));
                 });
 
             }

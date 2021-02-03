@@ -18,11 +18,12 @@ export default class App extends React.Component {
     this.loadJWT = this.loadJWT.bind(this);
   }
 
-  newJWT = (token) => {
-    console.log("Updating the token: " + token);
+  newJWT = (token, user) => {
+    console.log("Updating the token: " + user);
 
     this.setState({ 
-      jwt:token
+      jwt:token,
+      user
     });
 
   }
