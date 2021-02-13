@@ -74,8 +74,8 @@ function TabNavigator(props) {
                 { props => <Alerts {...props} jwt={jwt} user={user}/>}
             </Tab.Screen>  
 
-            <Tab.Screen name="Profile">
-                { props => <Profile {...props} jwt={jwt} user={user}/>}
+            <Tab.Screen name="Cells">
+                { props => <Cells {...props} jwt={jwt} user={user}/>}
             </Tab.Screen>   
         </Tab.Navigator>
     )

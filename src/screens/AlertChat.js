@@ -15,12 +15,13 @@ import { theme, alerts } from '../constants';
 
 // utils
 import getIconNameByAlertType from '../utils/getIconName';
-import Authentication from '../utils/authentication/authenticate';
+import Authentication, { HOST_URL } from '../utils/authentication/authenticate';
 import deviceStorage from '../utils/deviceStorage';
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+
 
 export default class AlertChat extends React.Component {
     constructor(props) {
@@ -176,13 +177,13 @@ export default class AlertChat extends React.Component {
         // console.log(response);
         if(response.alert) {
             console.log("success");
-            let { chats }  = this.state;
-            chats.push(response);
+            // let { chats }  = this.state;
+            // chats.push(response);
 
             this.setState({
                 text:"",
                 isValid:false,
-                chats
+                // chats
             });
 
             // redirect to map
@@ -213,6 +214,9 @@ export default class AlertChat extends React.Component {
         this.messageRef.current.scrollToEnd();
     }
 
+    componentWillUnmount() {
+        this.webSocket.close();
+    }
     componentDidMount() {
         console.log(this.props);
         const { user, route : { params } } = this.props;
@@ -232,6 +236,61 @@ export default class AlertChat extends React.Component {
             'keyboardDidShow',
             this._keyboardDidShow,
         );
+
+        // connect to the websocket
+        let url = 'ws://' + HOST_URL + '/ws/chat/room/' + alert.pk + '/';
+        console.log(url);
+
+        this.webSocket =new WebSocket(url); 
+        this.webSocket.onopen = this.onSocketOpen();
+        this.webSocket.onmessage = (ev) => {this.onSocketMessage(ev)};
+        this.webSocket.onclose = (ev) => { this.onSockectClose(ev) };
+    }
+
+    onSocketOpen = () => {
+        console.log("websocket connected");
+    }
+
+    onSocketMessage = (event) => {
+        // get the message
+        let data = JSON.parse(event.data);
+        let { message, user, datetime, pk, image, alert_id, author } = data;
+
+        let incomingChat =  {
+            alert: alert_id, 
+            author: author, 
+            image: image, 
+            is_read: false, 
+            pk: pk, 
+            text: message, 
+            time: datetime,
+            username: user
+        };
+
+        // console.log(message);
+        // update the chats 
+        let { chats }  = this.state;
+        let isChat = chats.find(chat => incomingChat.pk == chat.pk);
+
+        // console.log(isChat);
+        console.log("Incoming Chat");
+
+        if(!isChat) {
+            console.log("Incoming Chat");
+            console.log(incomingChat);
+            chats.push(incomingChat);
+            console.log("Incoming Chat");
+
+            this.setState({
+                chats
+            });
+        }  
+        
+    }
+
+    onSockectClose = (eClose) => {
+        console.log(eClose);
+        console.log("Chat socket closed unexpectedly");
     }
 
     _keyboardDidShow() {
@@ -244,7 +303,7 @@ export default class AlertChat extends React.Component {
         let { user } = this.state;
 
         let cardStyle = user.username == item.username ? styles.cardRight : styles.cardLeft;
-        // let sender = user.username == item.username ? "you" : item.username;
+        let sender = user.username == item.username ? "you" : item.username;
 
         let month = monthNames[time.getMonth()];
         let day = time.getDay();
@@ -257,7 +316,7 @@ export default class AlertChat extends React.Component {
 
                 {
                     item.text != "" && <Card style={cardStyle} shadow>
-                        <Typography style={styles.userName}>{item.username}</Typography>
+                        <Typography style={styles.userName}>{sender}</Typography>
                         <Typography>{item.text}</Typography>
                         <Typography style={styles.timeStamp}>{time.getHours()}:{time.getMinutes()}</Typography>
                     </Card>
@@ -265,7 +324,7 @@ export default class AlertChat extends React.Component {
 
                 {
                     item.image && <Card style={cardStyle} shadow>
-                        <Typography style={styles.userName}>{item.username}</Typography>
+                        <Typography style={styles.userName}>{sender}</Typography>
                         <Image
                             style={styles.image}
                             source={{uri: item.image }}

@@ -1,6 +1,7 @@
 
 import axios from 'axios';
-const API_URL = 'https://f1c9fe108adf.ngrok.io';
+
+const API_URL = 'https://a33bb5db08a8.ngrok.io';
 const LOGIN_URL = API_URL + '/api/v1/rest-auth/login/';
 const REGISTER_URL = API_URL + '/api/v1/rest-auth/registration/';
 const ALERTS_URL = API_URL + '/api/v1/';
@@ -9,6 +10,9 @@ const ALERT_CHATS_URL = API_URL + '/api/v1/messages/';
 const USER_URL = API_URL + '/api/v1/users/'
 // const UPDATE_PROFILE = 
 
+const HOST_URL = 'a33bb5db08a8.ngrok.io';
+
+export { HOST_URL }
 export default class Authentication {
     constructor(token="") {
         this.token = token;

@@ -1,6 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+
+import Block from './src/components/Block';
+import Typography from './src/components/Text';
+import { theme } from './src/constants';
 
 import Navigator from './src/navigation';
 import deviceStorage from './src/utils/deviceStorage';
@@ -34,7 +38,8 @@ export default class App extends React.Component {
     
     this.setState({
       jwt,
-      user
+      user,
+      loading:false
     });
   }
 
@@ -43,7 +48,16 @@ export default class App extends React.Component {
   }
 
   render() {
-    const { jwt, user } = this.state;
+    const { jwt, user, loading } = this.state;
+
+    if(loading) {
+      return (
+        <Block style={styles.container}>
+          <ActivityIndicator size="small" color={theme.colors.black} />
+          <Typography >Loading ... </Typography>
+        </Block>
+      );
+    }
 
     return (
       <Navigator jwt={jwt} user={user} newJWT={this.newJWT} />
@@ -54,6 +68,8 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#dd0000'
+    backgroundColor: '#fff',
+    alignItems:'center',
+    justifyContent:'center'
   },
 });
