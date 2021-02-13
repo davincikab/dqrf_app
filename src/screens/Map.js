@@ -31,6 +31,10 @@ import Authentication from '../utils/authentication/authenticate';
 
 MapboxGL.setAccessToken("pk.eyJ1IjoiZGF1ZGk5NyIsImEiOiJjanJtY3B1bjYwZ3F2NGFvOXZ1a29iMmp6In0.9ZdvuGInodgDk7cv-KlujA");
 
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 const images = {
     'custom-marker':require('../assets/images/icon.png'),
 };
@@ -140,6 +144,37 @@ export default class MapContainer extends React.Component {
         
     }
 
+    getUserLocation = () => {
+        console.log("Get coordintes");
+
+        // trigger geolocation
+        Geolocation.getCurrentPosition(info => {
+            //  update the userLocation
+            console.log(info.coords);
+
+            this.setState({
+                isReportMode:false,
+                userLocation:{
+                   latitude: parseFloat(info.coords.latitude), 
+                   longitude: parseFloat(info.coords.longitude),
+                }
+            });
+        }, error => {
+            console.log("Location Response");
+            console.error(error);
+        });
+    }
+
+    navigateToChat = (alert) => {
+        const { jwt, user } = this.props;
+
+        this.props.navigation.navigate('Alert Chat', {
+            token:jwt,
+            alert:alert.properties,
+            user:user
+        });
+    }
+
     componentDidMount() {
         console.log(this.props);
         // get alerts
@@ -163,8 +198,9 @@ export default class MapContainer extends React.Component {
 
     render() {
 
-        const { amenity, roads, building, activeAmenity, activeAlert, alerts, isReportMode} = this.state;
+        const { amenity, roads, building, activeAmenity, activeAlert, alerts,  userLocation, isReportMode} = this.state;
 
+        let center = userLocation.latitude ? [userLocation.longitude, userLocation.latitude] : [36.962846352233818, -0.399017834239519];
         return(
         <KeyboardAvoidingView
             behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -181,7 +217,7 @@ export default class MapContainer extends React.Component {
                 zoomLevel={14}
                 pitch={0}
                 heading={0}
-                centerCoordinate={[36.962846352233818, -0.399017834239519]}
+                centerCoordinate={center}
               />
                 <MapboxGL.Images 
                     images={images}
@@ -211,7 +247,7 @@ export default class MapContainer extends React.Component {
                     </MapboxGL.ShapeSource>
                 }
 
-                {
+                {/* {
                     roads.type &&
                     <MapboxGL.ShapeSource
                         id="roads"
@@ -222,6 +258,21 @@ export default class MapContainer extends React.Component {
                             style={layerStyles.shortestPath}
                         />
                     </MapboxGL.ShapeSource>
+                } */}
+                {
+                    userLocation.latitude &&
+                    <MapboxGL.MarkerView 
+                        coordinate={[userLocation.longitude, userLocation.latitude]}
+                    >
+                        <TouchableOpacity
+                            onPress={() => this.setState({activeAlert:alert})}
+                        > 
+                            <Image 
+                                style={styles.marker} 
+                                source={require('../assets/images/icon.png')} 
+                            />
+                        </TouchableOpacity>
+                    </MapboxGL.MarkerView>
                 }
                 {
                     alerts[0] && 
@@ -268,6 +319,7 @@ export default class MapContainer extends React.Component {
                 <Button 
                     style={[styles.circleButton, styles.locationButton]} 
                     color={theme.colors.accent}
+                    onPress={this.getUserLocation}
                 >
                   <Icon name="location-arrow" size={theme.sizes.base} color={theme.colors.white} />
                 </Button>
@@ -280,29 +332,18 @@ export default class MapContainer extends React.Component {
                   <Icon name="plus" size={theme.sizes.base} color={theme.colors.white} />
                 </Button>
 
-                <Button 
+                {/* <Button 
                     style={[styles.circleButton, styles.directionButton]} 
                     color={theme.colors.black}
                     >
                     <Icon name="arrows" size={theme.sizes.base} color={theme.colors.white} />
-                </Button>
+                </Button> */}
 
             {  activeAlert.type && 
                 <AlertModal 
                     alert={activeAlert}
                     closeAlertModal={() => this.setState({activeAlert:{} })}
-                />
-            }
-
-            {
-                isReportMode &&
-                <AlertCreateModal 
-                    reported_by=""
-                    emergency_type=""
-                    time=""
-                    location_name=""
-                    username = ""
-                    description=""
+                    navigateToChat={(alert) => this.navigateToChat(alert)}
                 />
             }
             </Block>
@@ -311,9 +352,9 @@ export default class MapContainer extends React.Component {
     }
 }
 
-const AlertModal = ({alert, closeAlertModal}) => {
+const AlertModal = ({alert, closeAlertModal, navigateToChat}) => {
     // props
-    let { reported_by, emergency_type, time, location_name, description } = alert.properties;
+    let { reported_by, emergency_type, time, location_name, description, username, alert_image } = alert.properties;
 
     const markerCenter = alert.geometry.coordinates;
     // colors
@@ -333,11 +374,11 @@ const AlertModal = ({alert, closeAlertModal}) => {
                     <Block center flex={0.8} style={{flexDirection:'row'}} padding={[2, 10]}>
                         <Icon name="exclamation-circle" size={theme.sizes.base * 3} color={theme.colors.white} /> 
                         <Typography h3 style={styles.marginLeft} white>
-                            <Typography bold white h3>{reported_by}</Typography> Issued a <Typography bold white h3>{emergency_type}</Typography> alert
+                            <Typography bold white h3>{username}</Typography> Issued a <Typography bold white h3>{emergency_type}</Typography> alert
                         </Typography>
 
                         <Typography caption white style={styles.time}>
-                            {time.getHours()}:{time.getMinutes()}
+                          {time.getDay()} {monthNames[time.getMonth()]} at {time.getHours()}:{time.getMinutes()} 
                         </Typography>
                     </Block>
 
@@ -347,25 +388,14 @@ const AlertModal = ({alert, closeAlertModal}) => {
                     </Block>
 
                     <Block flex={1}>
-                        <MapboxGL.MapView 
-                            style={styles.map} 
-                        >
-                            <MapboxGL.Camera
-                                zoomLevel={14}
-                                pitch={0}
-                                heading={200}
-                                centerCoordinate={markerCenter}
-                            />
-
-                            <MapboxGL.MarkerView 
-                                coordinate={markerCenter}
-                            >
-                                <Image 
-                                    style={styles.marker} 
-                                    source={require('../assets/images/icon.png')} 
+                        {
+                            alert_image.map(image => (
+                                <Image
+                                    style={styles.image}
+                                    source={{uri: image }}
                                 />
-                            </MapboxGL.MarkerView>
-                        </MapboxGL.MapView>
+                            ))
+                        }
                     </Block>
 
                     <Block left center flex={0.3} 
@@ -381,21 +411,21 @@ const AlertModal = ({alert, closeAlertModal}) => {
 
                     <Block flex={0.4} padding={[10,0]}>
                         <Block style={{ flexDirection:'row'}} center middle>
-                            <Button shadow color={darkColor} style={styles.actionButton}>
+                            {/* <Button shadow color={darkColor} style={styles.actionButton}>
                                 <Icon name="location-arrow" size={18} color={ theme.colors.white}/>
                             </Button>
                             <Button shadow color={darkColor} style={styles.actionButton}>
                                 <Icon name="whatsapp" size={18} color={ theme.colors.white}/>
-                            </Button>
+                            </Button> */}
                         </Block>
 
                         <Block center >
-                            <Button 
+                            {/* <Button 
                                 style={{ ...styles.forwardButton, borderColor:darkColor}}
                             >
                                 <Icon name="share" size={10} color={ theme.colors.white}/>
                                 <Typography white bold style={styles.marginLeft}>FORWARD ALERT</Typography>
-                            </Button>
+                            </Button> */}
                         </Block>
                     </Block>
 
@@ -404,10 +434,13 @@ const AlertModal = ({alert, closeAlertModal}) => {
                             style={{...styles.successButton, backgroundColor:darkColor, borderColor:lightColor}} 
                             onPress={() => closeAlertModal()}
                         >
-                            <Typography center white>CANNOT HELP</Typography>
+                            <Typography center white>CLOSE</Typography>
                         </Button>
-                        <Button style={{...styles.successButton, backgroundColor:darkColor, borderColor:lightColor}}>
-                            <Typography center white>HELP</Typography>
+                        <Button 
+                            style={{...styles.successButton, backgroundColor:darkColor, borderColor:lightColor}}
+                            onPress={() => navigateToChat(alert) }
+                        >
+                            <Typography center white>CHAT</Typography>
                         </Button>
                     </Block>
 
@@ -416,70 +449,6 @@ const AlertModal = ({alert, closeAlertModal}) => {
         </Block>
     )
 }
-
-const AlertCreateModal = function(props) {
-    const { emergency_type, username, description, response_time, location, media} = props;
-
-    const [loading, setLoading] = useState(false);
-    const hasError = (field) => {
-        return false;
-    }
-
-    return (
-        <Block style={styles.alertForm} color={theme.colors.white}>
-                <Block flex={0.2} middle>
-                    <Typography h1 black bold>
-                       Create Alert
-                    </Typography>
-                </Block>
-                <Block middle>
-                    <Input 
-                        error={hasError('location')}
-                        label={"Location"}
-                        value={"location"}
-                        style={styles.input}
-                        // onChangeText={text => this.setState({username:text, errors:[]})}
-                    />
-
-                    <Input 
-                        error={hasError('username')}
-                        // label={"Registration Number"}
-                        value={""}
-                        style={styles.input}
-                        // onChangeText={text => this.setState({username:text, errors:[]})}
-                    />
-
-                    <Input 
-                        error={hasError('Description')}
-                        // label={"Registration Number"}
-                        value={""}
-                        style={styles.input}
-                        // onChangeText={text => this.setState({username:text, errors:[]})}
-                    />
-
-                    <Input 
-                        secure
-                        label={"Alert Type"}
-                        // error={hasError('password')}
-                        value={emergency_type}
-                        style={styles.input}
-                        // onChangeText={text => this.setState({password:text, errors:[]})}
-                    />
-
-                    <Button color={theme.colors.primary}>
-                        { loading && <ActivityIndicator size="small" color={theme.colors.white} />}
-                        {!loading && 
-                            <Typography center white>
-                                Report Alert
-                            </Typography>
-                        }
-                    </Button>
-                </Block>
-                
-            </Block>
-    )
-}
-
 
 // styles
 const styles = StyleSheet.create({
@@ -509,8 +478,8 @@ const styles = StyleSheet.create({
         borderRadius:8
     },
     marker:{
-        height:24,
-        width:15
+        height:40,
+        width:23
     },  
     popup:{
         backgroundColor:'#fff',
@@ -616,5 +585,8 @@ const styles = StyleSheet.create({
         position:'absolute',
         top:2,
         right:5
+    },
+    image:{
+        height:150
     }
 });
